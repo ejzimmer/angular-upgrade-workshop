@@ -1,6 +1,7 @@
 <div class="pickup" ng-if="eta > 0">
 	<div>Your driver is on the way!</div>
 	<strong>{{driverName}}</strong> will meet you in a <strong>{{carColour}} {{carModel}}</strong> in <strong>{{eta}}&nbsp;minutes</strong>.
+	<div>You {{jacketVerb}} need a jacket</div>
 </div>
 <div class="pickup" ng-if="eta === 0">
 	Your driver is here. Go go go!

@@ -5,6 +5,7 @@ import { UpgradeModule } from '@angular/upgrade/static';
 import { AppComponent } from './app.component';
 import { HelpComponent } from './help/help.component';
 import { YourTripsComponent } from './your-trips/your-trips.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -14,12 +15,18 @@ import { YourTripsComponent } from './your-trips/your-trips.component';
   ],
   imports: [
     BrowserModule,
-    UpgradeModule
+    UpgradeModule,
+    HttpClientModule
   ],
   providers: [
     {
       provide: 'TripHistoryService',
       useFactory: tripHistoryServiceFactory,
+      deps: ['$injector']
+    },
+    {
+      provide: 'GeolocationService',
+      useFactory: geolocationServiceFactory,
       deps: ['$injector']
     }
   ],
@@ -31,4 +38,7 @@ export class AppModule {
 
 export function tripHistoryServiceFactory(i: any) {
   return i.get('TripHistoryService');
+}
+export function geolocationServiceFactory(i: any) {
+  return i.get('GeolocationService');
 }
