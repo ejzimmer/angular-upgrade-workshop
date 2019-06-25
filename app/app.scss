@@ -1,0 +1,33 @@
+body {
+	margin: 0;
+	--hue: 250;
+	--medium-colour: hsl(var(--hue), 30%, 40%);
+	--dark-colour: hsl(var(--hue), 30%, 20%);
+	--light-colour: hsl(var(--hue), 30%, 90%);
+	font-family: Quicksand, sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.angular-google-map-container { height: 60vh; }
+
+.current-position {
+	--diameter: 15px;
+	width: var(--diameter);
+	height: var(--diameter);
+	border-radius: 50%;
+	border: 2px solid white;
+	background: #4285F4;
+	box-shadow: 0 0 4px 2px #bbb;
+	cursor: pointer;
+}
+
+button:focus {
+	outline: none;
+}
+
+@import './controllers/bottom-panel.scss';
+@import './directives/profile-directive.scss';
+@import './directives/user-rating-directive.scss';

@@ -1,0 +1,9 @@
+user-rating {
+	fill: var(--light-colour);
+	display: flex;
+	align-items: center;
+
+	svg {
+		margin-left: 5px;
+	}
+}

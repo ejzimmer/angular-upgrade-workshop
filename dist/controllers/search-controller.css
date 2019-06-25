@@ -1,0 +1,6 @@
+form.endpoints {
+  padding-left: 10px;
+  border-left: 1px dashed;
+  border-image: linear-gradient(to bottom, transparent, transparent 14px, var(--medium-colour) 14px, var(--medium-colour), var(--medium-colour) calc(100% - 14px), transparent calc(100% - 14px)) 1 100%; }
+  form.endpoints .address.destination::placeholder {
+    color: inherit; }

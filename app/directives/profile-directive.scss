@@ -1,0 +1,86 @@
+user-profile {
+	--transition-duration: .3s;
+	--background-colour: hsla(0, 0%, 80%, .6);
+	display: flex;
+	align-items: flex-start;
+	position: fixed;
+	top: 0;
+	left: calc(-100vw + 50px);
+	stroke: var(--medium-colour);
+	stroke-width: 12;
+	stroke-linecap: round;
+	transition: var(--transition-duration) all;
+
+	&.show-pane {
+		--background-colour: hsl(var(--hue), 10%, 95%);
+		left: 0;	
+
+		button {
+			background: var(--dark-colour);
+			stroke: var(--light-colour);
+			border: none;		
+		}
+	}
+
+	.panel, button {
+		background: var(--background-colour);
+		border: 1px solid hsl(0, 0%, 80%);
+		box-shadow: 1px 1px 2px 0 hsla(0, 0%, 70%, .4);
+		transition: var(--transition-duration) all;	
+	}
+
+	.panel {
+		width: calc(100vw - 50px);
+		height: 100vh;
+		border-style: none;
+		border-left-style: solid;		
+	}
+
+	button {
+		border-left: none;
+		border-radius: 0 5px 5px 0;
+		display: flex;
+		margin-top: 8px;
+		position: relative;
+		left: -1px;	
+	}
+
+	.media-object {
+		background: var(--dark-colour);
+		color: var(--light-colour);
+		display: grid;
+		grid-template-columns: 1fr 3fr;
+		padding: 20px;	
+
+		.profile-picture {
+			--diameter: 50px;
+			border-radius: 50%;
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center;
+			grid-row: 1 / 3;
+			width: var(--diameter);
+			height: var(--diameter);
+			margin-right: 10px;		
+		}
+
+		h2 {
+			font-size: 16px;
+			margin: 0;
+			align-self: flex-end;		
+		}
+
+		user-rating {
+			align-self: flex-start;
+		}
+	}
+
+	.options {
+		list-style-type: none;
+		font-size: 20px;
+		
+		li {
+			margin-bottom: 10px;
+		}
+	}
+}

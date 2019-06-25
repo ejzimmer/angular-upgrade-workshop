@@ -1,0 +1,21 @@
+.bottom-panel .route-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px; }
+  .bottom-panel .route-form .route {
+    display: grid;
+    grid-template: auto auto 1fr / 1fr max-content; }
+    .bottom-panel .route-form .route .destination {
+      color: var(--dark-colour);
+      font-size: 1.2em;
+      font-weight: bold; }
+    .bottom-panel .route-form .route .price {
+      grid-area: 1 / 2 / 3 / 3;
+      align-self: center;
+      color: var(--dark-colour);
+      font-size: 1.5em;
+      font-weight: bold;
+      text-align: right; }
