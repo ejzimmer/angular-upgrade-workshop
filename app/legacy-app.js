@@ -1,4 +1,8 @@
 import './app.js';
 import './legacy-imports.js';
+import { downgradeComponent } from '@angular/upgrade/static';
 
-export const LegacyModule = angular.module('passengr');
+import { HelpComponent } from '../src/app/help/help.component';
+
+export const LegacyModule = angular.module('passengr')
+	.directive('appHelp', downgradeComponent({ component: HelpComponent }));
