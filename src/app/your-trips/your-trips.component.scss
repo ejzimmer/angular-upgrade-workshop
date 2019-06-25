@@ -1,0 +1,27 @@
+h1 {
+	background: var(--medium-colour);
+	color: var(--light-colour);
+	padding: 1em;
+	margin: 0;
+	font-size: 24px;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+	color: var(--dark-colour);
+}
+
+li {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	padding: 1em;
+}
+
+li div:nth-child(2n) {
+	text-align: right;
+}
+
+li:not(:last-child) {
+	border-bottom: 1px solid var(--medium-colour);
+}

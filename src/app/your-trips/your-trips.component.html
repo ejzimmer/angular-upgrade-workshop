@@ -1,0 +1,9 @@
+<h1>Your Trips</h1>
+<ul>
+	<li *ngFor="let trip of trips | async">
+		<div>{{trip.date}}, {{trip.time}}</div>
+		<div>{{trip.price | currency}}</div>
+		<div>{{trip.car}}</div>
+		<div>{{trip.rating}} stars</div>
+	</li>
+</ul>

@@ -4,19 +4,31 @@ import { UpgradeModule } from '@angular/upgrade/static';
 
 import { AppComponent } from './app.component';
 import { HelpComponent } from './help/help.component';
+import { YourTripsComponent } from './your-trips/your-trips.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HelpComponent
+    HelpComponent,
+    YourTripsComponent
   ],
   imports: [
     BrowserModule,
     UpgradeModule
   ],
-  providers: [],
-  entryComponents: [HelpComponent]
+  providers: [
+    {
+      provide: 'TripHistoryService',
+      useFactory: tripHistoryServiceFactory,
+      deps: ['$injector']
+    }
+  ],
+  entryComponents: [HelpComponent, YourTripsComponent]
 })
 export class AppModule { 
   ngDoBootstrap() {}
+}
+
+export function tripHistoryServiceFactory(i: any) {
+  return i.get('TripHistoryService');
 }

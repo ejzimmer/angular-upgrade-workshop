@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>From legacy to legendary</title>
+</head>
+<body>
+	<h1>From Legacy to Legendary: upgrading your AngularJS app</h1>
+	<div>Table of contents</div>
+	<ol>
+		<li><a href="#part-0">Part 0: Preparation</a></li>
+		<li><a href="#part-1">Part 1: The Upgrade Wrapper</a></li>
+		<li><a href="#part-2">Part 2: Writing New Features</a></li>
+		<li><a href="#part-3">Part 3: Switching to the Angular Router</a></li>
+	</ol>
+	
+	<h2 id="part-0">Part 0: Preparation</h2>
+	<h3>Preparation</h3>
+	<p>Prerequisites: Node 12, NPM, IDE, Chrome (unfortunately, the demo doesn't work in Firefox. I've not tested other browsers)</p>
+	<ol>
+		<li>
+			<details>
+				<summary>Clone the passengr repo from https://github.com/ejzimmer/angular-upgrade-workshop.git</summary>
+				<code>git clone https://github.com/ejzimmer/angular-upgrade-workshop.git</code>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Install dependencies</summary>
+				<code>npm install</code>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Install the Angular CLI, globally. (This will make it easier to run CLI commands later)</summary>
+				<code>npm install -g @angular/cli</code>
+				<div>Just pick all the defaults</div>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Optional: Initialise a new Angular app named passengr inside the demo app</summary>
+				<code>cd angular-upgrade-workshop</code>
+				<code>ng new passengr</code>
+			</details>
+		</li>
+	</ol>
+
+	<h2 id="part-1">Part 1: The Upgrade Wrapper</h2>
+	<h3>Activity: Get passengr up & running</h3>
+	<ol>
+		<li>
+			<details>
+				<summary>If you haven't already, clone & install the demo app</summary>
+				<code>git clone https://github.com/ejzimmer/angular-upgrade-workshop.git</code>
+				<code>npm install</code>
+			</details>
+		</li>
+		<li>Start app up: <code>gulp watch</code></li>
+		<li>Open your browser to <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></li>
+		<li>Order a car, if you like</li>
+	</ol>
+
+	<h3>Activity: Create an Angular app</h3>
+	<ol>
+		<li>
+			<details>
+				<summary>If you haven't already, initialise a new Angular app called passengr, using the CLI</summary>
+				<code>cd angular-upgrade-workshop</code>
+				<code>ng new passengr</code>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Move the files out of the passengr directory and into the existing app</summary>
+				<p>
+					The CLI assumes we’re starting a brand new project, and puts all its stuff in a folder together. 
+					In our case though, we want to merge the CLI project with our existing project.
+					This means we want to move everything out of the angular-upgrade-workshop/passengr directory, 
+					and into the top level angular-upgrade-workshop directory. 
+					A couple of the newly generated files already exist in our top-level directory t hough, 
+					so we’ll need to merge those.
+				</p>
+				<ul>
+					<li>
+						passengr/README.md: grab the bits you want to keep (probably the instructions on how to run the project)
+						and copy them into ./README.md. Delete passengr/README.md
+					</li>
+					<li>
+						<p>
+							passengr/package.json: We need to copy all the scripts, dependencies and devDependencies from 
+							passengr/package.json into ./package.json. Make sure you replace the <code>test</code> script in 
+							./package.json with the one from passengr/package.json. Make sure you keep all the dependencies 
+							and devDependencies that are already in ./package.json. 
+						</p>
+						<p>
+							You should end up with a package.json that looks something like this (don't worry if some of 
+							the version numbers are different):
+						</p>
+
+						<pre><code>
+{
+	"name": "passengr",
+	"version": "0.0.0",
+	"scripts": {
+		"ng": "ng",
+		"start": "ng serve",
+		"build": "ng build",
+		"test": "ng test",
+		"lint": "ng lint",
+		"e2e": "ng e2e"
+	},
+	"private": true,
+	"dependencies": {
+		"@angular/animations": "~8.0.1",
+		"@angular/common": "~8.0.1",
+		"@angular/compiler": "~8.0.1",
+		"@angular/core": "~8.0.1",
+		"@angular/forms": "~8.0.1",
+		"@angular/platform-browser": "~8.0.1",
+		"@angular/platform-browser-dynamic": "~8.0.1",
+		"@angular/router": "~8.0.1",
+		"rxjs": "~6.4.0",
+		"tslib": "^1.9.0",
+		"zone.js": "~0.9.1"
+	},
+	"devDependencies": {
+		"@angular-devkit/build-angular": "~0.800.0",
+		"@angular/cli": "~8.0.4",
+		"@angular/compiler-cli": "~8.0.1",
+		"@angular/language-service": "~8.0.1",
+		"@types/node": "~8.9.4",
+		"@types/jasmine": "~3.3.8",
+		"@types/jasminewd2": "~2.0.3",
+		"codelyzer": "^5.0.0",
+		"jasmine-core": "~3.4.0",
+		"jasmine-spec-reporter": "~4.2.1",
+		"karma": "~4.1.0",
+		"karma-chrome-launcher": "~2.2.0",
+		"karma-coverage-istanbul-reporter": "~2.0.1",
+		"karma-jasmine": "~2.0.1",
+		"karma-jasmine-html-reporter": "^1.4.0",
+		"protractor": "~5.4.0",
+		"ts-node": "~7.0.0",
+		"tslint": "~5.15.0",
+		"typescript": "~3.4.3"
+	}
+}						
+						</code></pre>
+
+						<p>Make sure you delete passengr/package.json</p>
+					</li>
+					<li>
+						passengr/package-lock.json: Delete this file. It only contains default values, which we can easily regenerate
+					</li>
+					<li>passengr/node_modules/: can we copy this? or do we need to delete and reinstall?</li>
+					<li>everything else: move it into the top-level directory</li>
+					<li>delete the passengr directory</li>
+				</ul>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Start up the new Angular app and have a look at it</summary>
+				<code>ng serve</code>
+				<p>Open your browser to localhost:4200</p>
+			</details>
+		</li>
+	</ol>
+	<p>
+		You should now be able to see the new Angular app up and running (althought it doesn't contain any interesting 
+		content just yet!). If things have gone horribly wrong, you can follow the instructions below to get to this state.
+	</p>
+	<div class="short-cut">
+		<code>git checkout angular-starter</code>
+		<code>npm install</code>
+	</div>
+
+
+	<h3>Activity: Switch to Angular's <code>index.html</code></h3>
+	<p>
+		Currently, we have two index.html files - ./index.html (which contains the legacy app) and src/index.html (which contains 
+		the new Angular starter app). We want to use src/index.html, as that’s the one the Angular CLI will target. To do that, we need to move the relevant bits from ./index.html to src/index.html. The relevant bits, in this case, are the main element and the googleapis script.
+	</p>
+	<ol>
+		<li>Delete the <code>&lt;app-root&gt;</code> element from src/index.html</li>
+		<li>Copy the <code>&lt;main&gt;</code> element and all its contents from ./index.html to src/index.html</li>
+		<li>
+			Copy the googleapis script from index.html into src/index.html. Unfortunately, this dependency isn't set up in 
+			a way that would allow us to manage it via NPM.
+		</li>
+	</ol>
+
+	<p>Your src/index.html file should end up looking like this:</p>
+	<pre><code>
+		&lt;!doctype html&gt;
+		&lt;html lang="en"&gt;
+		&lt;head&gt;
+			&lt;meta charset="utf-8"&gt;
+			&lt;title&gt;Passengr&lt;/title&gt;
+			&lt;base href="/"&gt;
+		
+			&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+			&lt;link rel="icon" type="image/x-icon" href="favicon.ico"&gt;
+		&lt;/head&gt;
+		&lt;body&gt;
+			&lt;main ng-app="passengr" ng-controller="MainCtrl"&gt;
+				&lt;ui-gmap-google-map center="map.center" zoom="map.zoom" events="map.events" options="map.options"&gt;
+				&lt;/ui-gmap-google-map&gt;
+				&lt;ui-view class="bottom-panel"&gt;&lt;/ui-view&gt;
+				&lt;user-profile&gt;&lt;/user-profile&gt;
+			&lt;/main&gt;
+			&lt;script src="//maps.googleapis.com/maps/api/js?key=AIzaSyCKwKMt_VIYXsJRi7NPA1DpE-hmXF8v41Y&libraries=places"&gt;&lt;/script&gt;
+		&lt;/body&gt;
+		&lt;/html&gt;			
+	</code></pre>
+
+	<p>Everything should compile ok, but if you open localhost:4200 in your browser, and check the console...</p>
+
+	<div class="error">ERROR Error: The selector "app-root" did not match any elements</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>This error is due to the way that Angular builds itself and starts up</p>
+		<ol>
+			<li>
+				As part of the build process, a link to src/main.ts is inserted in index.html. You can see 
+				this by inspecting index.html in your browser, if you like.
+			</li>
+			<li>
+				On page load, index.html runs src/main.ts
+			</li>
+			<li>
+				src/main.ts loads <code>AppModule</code>. This is done via the following code:
+				<code>platformBrowserDynamic().bootstrapModule(AppModule)</code>
+			</li>
+			<li>
+				<code>AppModule</code> (in src/app.module.ts) contains a <code>bootstrap</code> property,
+				which tells it which component to load initially:
+				<code>bootstrap: [AppComponent]</code>
+				Angular finds the selector for this component (<code>app-root</code>) in index.html and 
+				instantiates the component
+			</li>
+		</ol>
+
+		<p>
+			We just deleted the <code>&lt;app-root&gt;</code> element out of index.html though, so Angular
+			can't find it. So it freaks out, just a little bit.
+		</p>
+	</details>
+	<details class="solution">
+		<summary>
+			We need to stop Angular attempting to initialise the <code>AppComponent</code>, by removing the 
+			bootstrap property from <code>AppModule</code>
+		</summary>
+		<ol>
+			<li>
+				<p>Remove the bootstrap property from the <code>AppModule</code> definition in src/app/app.module.ts</p>
+				<p>The module definition should now look like this</p>
+<pre>
+	<code>
+@NgModule({
+	declarations: [
+		AppComponent
+	],
+	imports: [
+		BrowserModule
+	],
+	providers: [],
+})
+export class AppModule { }			
+	</code>
+</pre>
+			</li>
+		</ol>
+	</details>
+
+	<p>If we check the console now, the app-root error should have gone away, but been replaced by a new error...</p>
+
+	<div class="error">
+		ERROR Error: The module AppModule was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. Please define one of these.
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			Because <code>AppModule</code> is the first module loaded, Angular expects it to bootstrap something, either by the <code>bootstrap</code> property of the module decoration, or via a function called <code>ngDoBootstrap</code> in the module class. We don’t actually want it to bootstrap anything, so we can just give it a dummy <code>ngDoBootstrap</code> function.
+		</p>
+	</details>
+	<details class="solution">
+		<summary>Add an empty function named <code>ngDoBootstrap</code> to the <code>AppModule</code> class</summary>
+		<p>The <code>AppModule</code> class should now look like this:</p>
+<pre><code>
+	export class AppModule { 
+		ngDoBootstrap() {}
+	}		
+</code></pre>
+	<p>You don't need to change the decorator at all.</p>
+	</details>
+
+	<p>
+		So now, if we check back with the browser, we don't get any errors! Sensational! Unfortunately, we also 
+		don't get anything on the page, which isn't quite what we were going for...
+	</p>
+
+	<div class="short-cut">
+		<code>git checkout index-html</code>
+	</div>
+	
+
+	<h3>Activity: Bootstrap the legacy app</h3>
+	<p>
+		The reason we don't see anything on the page is that we haven't actually loaded any of our legacy code. There's just 
+		nothing in our index.html or any of the Angular TypeScript that references our old app at all. So we need to do something 
+		about that.
+	</p>
+	<ol>
+		<li>
+			Install the ng-upgrade module, which will allow our Angular app to communicate with our AngularJS code.
+			<code>npm install @angular/upgrade</code>
+		</li>
+		<li>
+			In src/main.ts, import the upgrade module from @angular/upgrade/static.
+			<code>import { UpgradeModule } from '@angular/upgrade/static';</code>
+		</li>
+		<li>
+			In main.ts, bootstrap the AngularJS app, once the Angular app has loaded. Do this by chaining another <code>then</code>
+			to the promise returned by <code>bootstrapModule(AppModule)</code>
+<pre><code>
+.then((platformRef) => {
+	const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
+	upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+})	
+</code></pre>
+		</li>
+	</ol>
+
+	<p>src/main.ts should now look something like this</p>
+<pre><code>
+	import { enableProdMode } from '@angular/core';
+	import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+	import { UpgradeModule } from '@angular/upgrade/static';
+	
+	import { AppModule } from './app/app.module';
+	import { environment } from './environments/environment';
+	
+	if (environment.production) {
+		enableProdMode();
+	}
+	
+	platformBrowserDynamic().bootstrapModule(AppModule)
+		.then((platformRef) => {
+			const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
+			upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+		})
+		.catch(err => console.error(err));
+</code></pre>
+
+	<details class="info">
+		<summary>What is this code doing?</summary>
+		<code>const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;</code>
+		is grabbing a reference to the UpgradeModule
+		<code>upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])</code>
+		is going to find an element with an id of <code>legacy-app</code>, and attach an AngularJS module specified by <code>LegacyModule.name</code> to it.
+	</details>
+
+
+
+
+	<div class="error">Cannot find name 'LegacyModule'</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	<div class="error">Uncaught ReferenceError: angular is not defined</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	<div class="error">
+		NullInjectorError: StaticInjectorError(AppModule)[UpgradeModule]:<br>
+	  StaticInjectorError(Platform: core)[UpgradeModule]:<br>
+    NullInjectorError: No provider for UpgradeModule!
+	</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	<div class="error">Error: AngularJS v1.x is not loaded!</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	
+	<h3>Activity: Load the external dependencies</h3>
+	<div class="error">
+		Error: [$injector:modulerr] Failed to instantiate module $$UpgradeModule due to:<br>
+		Error: [$injector:modulerr] Failed to instantiate module passengr due to:<br>
+		Error: [$injector:modulerr] Failed to instantiate module ui.router due to:<br>
+		Error: [$injector:nomod] Module 'ui.router' is not available! You either misspelled the module name or forgot to load it. If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	
+	<h3>Activity: Load the internal dependencies</h3>
+	<div class="error">
+		GET http://localhost:4200/controllers/main-controller.html 404 (Not Found)<br>
+		Error: [$compile:tpload] Failed to load template: /controllers/main-controller.html (HTTP status: 404 Not Found)
+	</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	<div class="error">
+		Uncaught Error: [$injector:nomod] Module 'passengr' is not available! You either misspelled the module name or forgot to load it. If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	<div class="info">
+		<details>
+			<summary>What does this error mean?</summary>
+		</details>
+	</div>
+	<div class="error">
+		Uncaught Error: [$injector:nomod] Module 'passengr' is not available! You either misspelled the module name or forgot to load it. If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	
+	<h3>Activity: Clean up</h3>
+
+	<h2 id="part-2">Part 2: Writing New Features</h2>
+
+	<h3>Activity: Create an Angular Component to use in an AngularJS template</h3>
+
+	<h3>Activity: Create an Angular Component that relies on an AngularJS service</h3>
+
+	<h3>Activity: Create an Angular service and retrofit it into an AngularJS controller</h3>
+
+	<h3>Activity: Use an AngularJS directive as as Angular component</h3>
+
+	<h2 id="part-3">Part 3: Switching to the Angular router</h2>
+</body>
+</html>

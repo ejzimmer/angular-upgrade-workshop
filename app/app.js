@@ -48,5 +48,9 @@ angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 			.state('help', {
 				url: '/help',
 				component: 'appHelp'
+			})
+			.state('your-trips', {
+				url: '/trips',
+				component: 'appYourTrips'
 			});
 	});
