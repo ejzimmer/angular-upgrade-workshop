@@ -1,17 +1,28 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { UpgradeModule } from '@angular/upgrade/static';
+import { NgModule, Directive, Input, ElementRef, Injector } from '@angular/core';
+import { UpgradeModule, UpgradeComponent } from '@angular/upgrade/static';
 
 import { AppComponent } from './app.component';
 import { HelpComponent } from './help/help.component';
 import { YourTripsComponent } from './your-trips/your-trips.component';
 import { HttpClientModule } from '@angular/common/http';
 
+@Directive({selector: 'app-user-rating'})
+export class UserRatingComponentWrapper extends UpgradeComponent {
+  @Input() stars: number;
+
+  constructor(elementRef: ElementRef, injector: Injector) {
+    super('userRating', elementRef, injector);
+  }
+}
+
+
 @NgModule({
   declarations: [
     AppComponent,
     HelpComponent,
-    YourTripsComponent
+    YourTripsComponent,
+    UserRatingComponentWrapper
   ],
   imports: [
     BrowserModule,

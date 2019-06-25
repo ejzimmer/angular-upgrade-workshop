@@ -4,6 +4,6 @@
 		<div>{{trip.date}}, {{trip.time}}</div>
 		<div>{{trip.price | currency}}</div>
 		<div>{{trip.car}}</div>
-		<div>{{trip.rating}} stars</div>
+		<app-user-rating [stars]="trip.rating"></app-user-rating>
 	</li>
 </ul>

@@ -19,7 +19,7 @@ angular.module('passengr')
 				car: 'Kia Rio',
 				driver: 'Vineet',
 				price: 20.62,
-				rating: 4.3
+				rating: 4
 			},
 			{
 				origin: '43 Stockdale St, Dickson, ACT',

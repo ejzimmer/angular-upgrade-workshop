@@ -1,4 +1,4 @@
-user-rating {
+user-rating, app-user-rating {
 	stroke-width: 2;
 	stroke: var(--light-colour);
 	fill: var(--dark-colour);
@@ -12,5 +12,6 @@ user-rating {
 
 	path.fill {
 		fill: var(--light-colour);
+		stroke: var(--dark-colour);
 	}
 }
