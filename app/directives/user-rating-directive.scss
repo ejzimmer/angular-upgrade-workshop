@@ -1,0 +1,16 @@
+user-rating {
+	stroke-width: 2;
+	stroke: var(--light-colour);
+	fill: var(--dark-colour);
+	display: flex;
+	align-items: center;
+
+	svg {
+		margin-left: 5px;
+		width: 100%;
+	}
+
+	path.fill {
+		fill: var(--light-colour);
+	}
+}

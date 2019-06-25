@@ -1,0 +1,28 @@
+.bottom-panel .route-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	max-width: 400px;
+
+	.route {
+		display: grid;
+		grid-template: auto auto 1fr / 1fr max-content;
+
+		.destination {
+			color: var(--dark-colour);
+			font-size: 1.2em;
+			font-weight: bold;		
+		}
+
+		.price {
+			grid-area: 1 / 2 / 3 / 3;
+			align-self: center;
+			color: var(--dark-colour);
+			font-size: 1.5em;
+			font-weight: bold;
+			text-align: right;		
+		}
+	}
+}

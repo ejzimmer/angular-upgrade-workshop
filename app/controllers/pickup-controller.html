@@ -1,0 +1,8 @@
+<div ng-if="!loading" style="display: flex; flex-direction: column; align-items: center;">
+	<div class="pickup">
+		<div>I am ready to be picked up from</div>
+		<div>{{ currentLocation }}</div>
+	</div>
+	<button ng-click="requestDriver()">Come get me!</button>
+</div>
+<div ng-if="loading">Finding your driver...</div>

@@ -1,0 +1,8 @@
+<div class="route-form">
+	<div class="route">
+		<div class="destination">{{ destination }}</div>
+		<div class="eta">arrive {{ eta | date: 'HH:MM' }}</div>
+		<div class="price">{{ price | currency }}</div>
+	</div>
+	<button ng-click="confirm()">Take me there!</div>
+</div>

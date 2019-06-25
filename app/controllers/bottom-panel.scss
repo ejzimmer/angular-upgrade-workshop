@@ -1,0 +1,69 @@
+ui-view.bottom-panel {
+	position: fixed;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2em 0;
+	background: hsl(var(--hue), 10%, 95%);
+	height: 40vh;
+	width: 100%;
+	box-shadow: 0 -1px 2px 0 hsla(0, 0%, 70%, .4);
+	color: var(--dark-colour);
+
+	form {
+		width: 80%;
+	}
+
+	.address, input.address, button {
+		background: var(--light-colour);
+		padding: .25em;
+		width: 100%;
+		border: 0;
+		font-family: inherit;
+		margin-bottom: .6em;
+		min-height: 28px;
+		font-size: inherit;
+		position: relative;
+	}
+
+	.address.destination, button {
+		background: var(--medium-colour);
+		color: var(--light-colour);
+		margin-bottom: 0;
+		border: 1px solid var(--medium-colour);
+		cursor: pointer;
+
+		&:focus {
+			outline: 1px dashed var(--medium-colour);
+			outline-offset: 3px;
+		}
+		
+	}	
+
+	button {
+		width: auto;
+
+		&:hover {
+			background: var(--light-colour);
+			color: var(--medium-colour);	
+		}
+	}
+
+	.route, .pickup {
+		background: white;
+		padding: 1em 10%;
+		border: 1px solid var(--dark-colour);
+		width: 80%;
+	}
+
+	.route-form button, .pickup + button {
+		padding: .5em;
+		margin-top: 2em;
+	}
+	
+}
+
+@import './search-controller.scss';
+@import './confirm-controller.scss';
+@import './pickup-controller.scss';

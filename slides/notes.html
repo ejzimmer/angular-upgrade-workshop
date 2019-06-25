@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Modernising your AngularJS app</title>
+
+	<link rel="stylesheet" href="lib/css/monokai.css">
+	<link rel="stylesheet" href="css/fonts.css">
+	<link rel="stylesheet" href="css/notes.css">
+
+	<script src="js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+
+	<style>
+		body.light-theme {
+			background: var(--text-colour);
+			color: var(--background-colour);
+		}
+
+		#theme-switcher {
+			opacity: 0;
+			position: absolute;
+			top: 0;
+			right: 0;
+		}
+		#theme-switcher + label {
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			font-family: Nunito, sans-serif;
+			font-size: 24px;
+		}
+		#theme-switcher + label::after {
+			content: '';
+			display: block;
+			width: 80%;
+			height: 40px;
+			border-radius: 20px;
+			border: 3px solid currentColor;
+			box-sizing: border-box;
+			background: linear-gradient(to left, currentColor, currentColor 50%, transparent 50%);
+		}
+	</style>
+
+	<script>
+		function toggleTheme() { document.querySelector('body').classList.toggle('light-theme'); }
+	</script>
+</head>
+<body>
+	<h1 style="display: flex; justify-content: space-between; align-items: flex-start">
+		<div>
+			<div style="text-transform: uppercase">From Legacy to Legendary:</div> modernising your AngularJS app
+		</div>
+		<div style="position: relative;">
+			<input type="checkbox" onclick="toggleTheme()" id="theme-switcher"><label for="theme-switcher">Switch theme</label>
+		</div>
+	</h1>
+	
+	<h2>Table of contents</h2>
+	<ol>
+		<li><a href="#part-0">Part 0: Preparation</a></li>
+		<li><a href="#part-1">Part 1: The Upgrade Wrapper</a></li>
+		<li><a href="#part-2">Part 2: Writing New Features</a></li>
+		<li><a href="#part-3">Part 3: Handing Control to Angular</a></li>
+	</ol>
+
+	<h2 id="part-0">Part 0: Preparation</h2>
+	<p>Prerequisites: A recent versionof Node (like 10 or 12), NPM, IDE, browser</p>
+	<ol>
+		<li>
+			<details>
+				<summary>Clone the passengr repo from https://github.com/ejzimmer/angular-upgrade-workshop.git</summary>
+				<pre><code class="bash">git clone https://github.com/ejzimmer/angular-upgrade-workshop.git</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Install dependencies</summary>
+				<pre><code class="bash">npm install</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Install the Angular CLI, globally. (This will make it easier to run CLI commands later)</summary>
+				<pre><code class="bash">npm install -g @angular/cli</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Optional: Initialise a new Angular app named passengr inside the demo app</summary>
+<pre><code class="bash">cd angular-upgrade-workshop
+ng new passengr</code></pre>
+				<div>You don't want routing, and you want to choose SCSS for styling</div>
+			</details>
+		</li>
+	</ol>
+
+	<h2 id="part-1">Part 1: The Upgrade Wrapper</h2>
+	<h3>Activity: Get passengr up & running</h3>
+	<ol>
+		<li>
+			<details>
+				<summary>If you haven't already, clone & install the demo app</summary>
+<pre><code class="bash">git clone https://github.com/ejzimmer/angular-upgrade-workshop.git
+npm install</code></pre>
+			</details>
+		</li>
+		<li>Start the app: <pre><code class="bash">npx gulp watch</code></pre></li>
+		<li>Open your browser to <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></li>
+		<li>Order a car, if you like.</li>
+	</ol>
+
+	<h3>Activity: Create an Angular app</h3>
+	<ol>
+		<li>
+			<details>
+				<summary>If you haven't already, initialise a new Angular app called 'passengr', using the CLI.</summary>
+<pre><code class="bash">cd angular-upgrade-workshop
+ng new passengr</code></pre>
+				<div>You don't want routing, and you want to choose SCSS for styling</div>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Move the files out of the passengr directory and into the existing app.</summary>
+				<p>
+					The CLI assumes we're starting a brand new project, and puts all its stuff in a folder together. 
+					In our case though, we want to merge the CLI project with our existing project.
+					This means we want to move everything out of the angular-upgrade-workshop/passengr directory, 
+					and into the top level angular-upgrade-workshop directory. 
+					A couple of the newly generated files already exist in our top-level directory though, 
+					so we'll need to merge those.
+				</p>
+				<ul class="files">
+					<li>
+						passengr/README.md: grab the bits you want to keep (probably the instructions on how to run the project)
+						and copy them into ./README.md. Delete passengr/README.md
+					</li>
+					<li>
+						<p>
+							passengr/package.json: We need to merge this with the pre-existing ./package.json
+						</p>
+						<ul>
+							<li class="cut">
+								<code>scripts</code>: Completely replace the <code class="inline">scripts</code> section in ./package.json with 
+								the shiny new <code class="inline">scripts</code> from passengr/package.json.
+							</li>
+							<li class="copy">
+								<code>dependencies</code>: Copy the <code class="inline">dependencies</code> from passengr/package.json into the 
+								<code class="inline">dependencies</code> section of ./package.json. You should be left with BOTH sets of <code class="inline">dependencies</code> 
+								in ./package.json.
+							</li>
+							<li class="copy">
+								<code>devDependencies</code>: Copy the <code class="inline">devDependencies</code> from passengr/package.json into the 
+								<code class="inline">devDependencies</code> section of ./package.json. You should be left with BOTH sets of <code class="inline">devDependencies</code> 
+								in ./package.json.
+							</li>
+						</ul>
+						<p>
+							You should end up with a package.json that looks something like this (don't worry if some of 
+							the version numbers are different):
+						</p>
+
+<pre><code class="json">{
+	"name": "angular-upgrade-workshop",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"ng": "ng",
+		"start": "ng serve",
+		"build": "ng build",
+		"test": "ng test",
+		"lint": "ng lint",
+		"e2e": "ng e2e"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@angular/animations": "~8.1.2",
+		"@angular/common": "~8.1.2",
+		"@angular/compiler": "~8.1.2",
+		"@angular/core": "~8.1.2",
+		"@angular/forms": "~8.1.2",
+		"@angular/platform-browser": "~8.1.2",
+		"@angular/platform-browser-dynamic": "~8.1.2",
+		"@angular/router": "~8.1.2",
+		"rxjs": "~6.4.0",
+		"tslib": "^1.9.0",
+		"zone.js": "~0.9.1",
+		"angular": "^1.4.14",
+		"angular-google-maps": "^2.4.1",
+		"angular-ui-bootstrap": "^2.5.6",
+		"angular-ui-router": "^1.0.22",		
+		"lodash": "^4.17.11",
+	},
+	"devDependencies": {
+		"@angular-devkit/build-angular": "~0.801.2",
+		"@angular/cli": "~8.1.2",
+		"@angular/compiler-cli": "~8.1.2",
+		"@angular/language-service": "~8.1.2",
+		"@types/node": "~8.9.4",
+		"@types/jasmine": "~3.3.8",
+		"@types/jasminewd2": "~2.0.3",
+		"codelyzer": "^5.0.0",
+		"gulp": "^4.0.2",
+		"gulp-angular-templatecache": "^3.0.0",
+		"gulp-concat": "^2.6.1",
+		"gulp-sass": "^4.0.2",
+		"gulp-uglify-es": "^1.0.4",
+		"jasmine-core": "~3.4.0",
+		"jasmine-spec-reporter": "~4.2.1",
+		"karma": "~4.1.0",
+		"karma-chrome-launcher": "~2.2.0",
+		"karma-coverage-istanbul-reporter": "~2.0.1",
+		"karma-jasmine": "~2.0.1",
+		"karma-jasmine-html-reporter": "^1.4.0",
+		"node-sass": "^4.12.0",
+		"protractor": "~5.4.0",
+		"readable-stream": "^3.4.0",
+		"reload": "^3.0.1",
+		"ts-node": "~7.0.0",
+		"tslint": "~5.15.0",
+		"typescript": "~3.4.3"
+	}
+}</code></pre>
+
+						<p>Make sure you delete passengr/package.json</p>
+					</li>
+					<li>
+						passengr/package-lock.json: Delete this file. It only contains default values, which we can easily regenerate.
+					</li>
+					<li>passengr/node_modules/: delete this folder</li>
+					<li>everything else: move it into the top-level directory</li>
+					<li>delete the passengr directory</li>
+				</ul>
+				<p>Finally, you'll need to run <code>npm install</code> again to regenerate all your dependencies in the right location</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Start up the new Angular app and have a look at it.</summary>
+<pre><code class="bash">ng serve</code></pre>
+				<div>Open your browser to localhost:4200</div>
+			</details>
+		</li>
+	</ol>
+	<p>
+		You should now be able to see the new Angular app up and running (although it's just the default 
+		starter page at the moment!).
+	</p>
+	<div class="short-cut">
+		<div>Something gone horribly wrong?</div>
+		<code>git checkout step-1-angular-starter</code>
+		<code>npm install</code>
+	</div>
+
+	<h3>Activity: Switch to Angular's index.html</h3>
+	<p>
+		Currently, we have two index.html files - ./index.html (which contains the legacy app) and src/index.html (which contains 
+		the new Angular starter app). We want to use src/index.html, as that's the one the Angular CLI will target. To do that, we need to move the relevant bits from ./index.html to src/index.html. The relevant bits, in this case, 
+		are the <code>main</code> element and the googleapis script.
+	</p>
+	<ol>
+		<li>Delete the <code>&lt;app-root&gt;</code> element from src/index.html</li>
+		<li>Copy the <code>&lt;main&gt;</code> element and all its contents from ./index.html to src/index.html</li>
+		<li>
+			Copy the googleapis script from index.html into src/index.html. Unfortunately, this dependency isn't set up in 
+			a way that would allow us to manage it via NPM.
+		</li>
+	</ol>
+
+	<details>
+		<summary>The updated src/index.html</summary>
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+	&lt;meta charset="utf-8"&gt;
+	&lt;title&gt;Passengr&lt;/title&gt;
+	&lt;base href="/"&gt;
+
+	&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+	&lt;link rel="icon" type="image/x-icon" href="favicon.ico"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;main ng-app="passengr">
+		&lt;ui-view>&lt;/ui-view>
+	&lt;/main>
+&lt;script src="//maps.googleapis.com/maps/api/js?key=AIzaSyCKwKMt_VIYXsJRi7NPA1DpE-hmXF8v41Y&libraries=places"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>	
+	</details>
+
+	<p>Everything should compile ok, but if you open localhost:4200 in your browser, and check the console...</p>
+
+	<div class="error">ERROR Error: The selector "app-root" did not match any elements</div>
+
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>This error is due to the way that Angular builds itself and starts up</p>
+		<ol>
+			<li>
+				As part of the build process, a link to src/main.ts is inserted in index.html. You can see 
+				this by inspecting index.html in your browser, if you like.
+			</li>
+			<li>
+				On page load, index.html runs src/main.ts
+			</li>
+			<li>
+				src/main.ts loads <code>AppModule</code>. This is done via the following code:
+				<code class="inline">platformBrowserDynamic().bootstrapModule(AppModule)</code>
+			</li>
+			<li>
+				<code>AppModule</code> (in src/app/app.module.ts) contains a <code class="inline">bootstrap</code> property,
+				which tells it which component to load initially:
+				<code>bootstrap: [AppComponent]</code>
+				Angular finds the selector for this component (<code class="inline">app-root</code>) in index.html and 
+				instantiates the component
+			</li>
+		</ol>
+
+		<p>
+			We just deleted the <code>&lt;app-root&gt;</code> element out of index.html though, so Angular
+			can't find it. So it freaks out, just a little bit.
+		</p>
+	</details>
+
+	<p>
+		We need to stop Angular attempting to initialise the <code>AppComponent</code>, by removing the 
+		bootstrap property from <code class="inline">AppModule</code>
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Remove the bootstrap property from the <code>AppModule</code> definition in src/app/app.module.ts</summary>
+				<p>Updated module definition</p>
+<pre><code>@NgModule({
+	declarations: [
+		AppComponent
+	],
+	imports: [
+		BrowserModule
+	],
+	providers: [],
+})
+export class AppModule { }			
+</code></pre>
+							</details>
+		</li>
+	</ol>
+
+	<p>If we check the console now, the app-root error should have gone away, but been replaced by a new error...</p>
+
+	<div class="error">
+		ERROR Error: The module AppModule was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. Please define one of these.
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			Because <code>AppModule</code> is the first module loaded, Angular expects it to bootstrap something, either by the <code class="inline">bootstrap</code> property of the module decoration, 
+			or via a function called <code class="inline">ngDoBootstrap</code> in the module class.
+		</p>
+	</details>
+
+	<p>We don't actually want to bootstrap anything, so we can fake it.</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Add a dummy <code class="inline">ngDoBootstrap</code> function to the <code class="inline">AppModule</code> class.</summary>
+				<p>Updated <code>AppModule</code> class</p>
+<pre><code>export class AppModule { 
+	ngDoBootstrap() {}
+}		
+</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		So now, if we check back with the browser, we don't get any errors! Sensational! Unfortunately, we also 
+		don't get anything on the page, which isn't quite what we were going for...
+	</p>
+
+	<div class="short-cut">
+		<div>Things not actually that sensational? Don't worry, just try:</div>
+		<code>git checkout step-2-index-html</code>
+	</div>
+	
+
+	<h3>Activity: Bootstrap the legacy app</h3>
+	<p>
+		The reason we don't see anything on the page is that we haven't actually loaded any of our legacy code. There's just 
+		nothing in our index.html or any of the Angular TypeScript that references our old app at all. So we need to do something 
+		about that.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Install the <code>@angular/upgrade</code>, which will allow our Angular app to communicate with our AngularJS code.</summary>
+				<pre><code class="bash">npm install @angular/upgrade</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>In src/main.ts, import <code>UpgradeModule</code> from @angular/upgrade/static.</summary>
+				<pre><code class="js">import { UpgradeModule } from '@angular/upgrade/static';</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>In main.ts, bootstrap the AngularJS app, once the Angular app has loaded. Do this by chaining another <code>then</code>
+						to the promise returned by <code class="inline">bootstrapModule(AppModule)</code>
+				</summary>
+<pre><code class="js">.then((platformRef) => {
+	const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
+	upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+})</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<details style="margin-bottom: 1em;">
+		<summary>Updated src/main.ts</summary>
+<pre><code>import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { UpgradeModule } from '@angular/upgrade/static';
+
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
+
+if (environment.production) {
+	enableProdMode();
+}
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+	.then((platformRef) => {
+		const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
+		upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+	})
+	.catch(err => console.error(err));</code></pre>
+	</details>
+
+	<details class="info">
+		<summary>What is this code doing?</summary>
+		<code>const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;</code>
+		is grabbing a reference to the UpgradeModule
+		<code>upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])</code>
+		is going to find an element with an id of <code class="inline">legacy-app</code>, and attach an 
+		AngularJS module specified by <code class="inline">LegacyModule.name</code> to it.
+	</details>
+
+	<p>Great, this time we don't even need to check the browser, because we've got a compilation error.</p>
+
+	<div class="error">Cannot find name 'LegacyModule'</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		This one is pretty straightforward - we're not importing <code>LegacyModule</code> anywhere in main.ts. So we 
+		need to import it. But before we do that, we also need to export it.
+	</details>
+
+	<div class="solution">
+		<ol>
+			<li>In app/app.js, assign the Angular module to a new variable named LegacyModule.</li>
+			<li>Export LegacyModule in app/app.js.</li>
+			<li>Import LegacyModule in src/main.ts.</li>
+		</ol>
+
+		<details>
+			<summary>app/app.js</summary>
+			<p>The start of app/app.js should look something like</p>
+			<pre><code>export const LegacyModule = angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])</code></pre>
+		</details>
+
+		<details>
+			<summary>src/main.ts</summary>
+			<p>src/main.ts should now contain a line like</p>
+			<pre><code>import { LegacyModule } from '../app/app';</code></pre>
+		</details>
+	</div>
+
+	<p>Well, that solves our compilation error. How do things look in the browser now?</p>
+
+	<div class="error">Uncaught ReferenceError: angular is not defined</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			main.ts imports our legacy app, which calls angular - but nothing is importing angular, so it's not available! 
+			This is a crucial difference between our gulp build - which just adds any files we tell it to - 
+			and Angular's webpack build - which builds a tree of dependencies, based on imports. 
+		</p>
+	</details>
+
+	<p>
+		Ideally, when using webpack, each file should import any dependencies it needs itself. 
+		This can be a bit of a pain if you're starting with a legacy app without proper dependency management.
+		Shortly, we'll have a look at a bit of a workaround for that. But, for now, let's just import angular in our app.js file.
+	</p>
+
+	<ol>
+		<li>In app/app.js 
+			<pre><code>import angular from 'angular';</code></pre>
+		</li>
+	</ol>
+
+	<p>Fantastic. Sorted. Now what?</p>
+
+	<div class="error">
+		NullInjectorError: StaticInjectorError(AppModule)[UpgradeModule]:<br>
+	  StaticInjectorError(Platform: core)[UpgradeModule]:<br>
+    NullInjectorError: No provider for UpgradeModule!
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			Ah, now we're getting to errors that will look a bit more familiar, if you've done much work with Angular! 
+			This error is telling us that AppModule needs to use UpgradeModule, 
+			but the dependency injector doesn't know what that is.
+		</p>
+	</details>
+
+	<ol>
+		<li>Provide the UpgradeModule to the AppModule, by adding it to AppModule's imports array.</li>
+		<li>Don't forget to import UpgradeModule from @angular/upgrade/static.</li>
+	</ol>
+
+	<details>
+		<summary>Updated src/app/app.module.ts</summary>
+<pre><code>import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { UpgradeModule } from '@angular/upgrade/static';
+
+@NgModule({
+	declarations: [
+		AppComponent
+	],
+	imports: [
+		BrowserModule,
+		UpgradeModule
+	],
+	providers: [],
+})
+export class AppModule { 
+	ngDoBootstrap() {}
+}</code></pre>
+	</details>
+
+	<p>This leaves us with just one last error... on the Angular side anyway</p>
+
+	<div class="error">Error: AngularJS v1.x is not loaded!</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>UpgradeModule needs access to AngularJS, but it's not available on the window object yet. </p>
+	</details>
+
+	<p>We need to let the UpgradeModule know which AngularJS to use by calling <code>setAngularJSGlobal()</code>.</p>
+
+	<p class="label">In src/main.ts</p>	
+	<ol>
+		<li>Import <code>setAngularJSGlobal</code> from <code class="inline">@angular/upgrade/static</code>.</li>
+		<li>Import <code>angular</code> from <code class="inline">angular</code>.</li>
+		<li>Call <code>setAngularJSGlobal(angular)</code>.</li>
+	</ol>
+
+	<details>
+		<summary>Updated main.ts</summary>
+<pre><code>import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { UpgradeModule, setAngularJSGlobal } from '@angular/upgrade/static';
+
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
+
+import angular from 'angular';
+import { LegacyModule } from '../app/app';
+
+if (environment.production) {
+	enableProdMode();
+}
+
+setAngularJSGlobal(angular);
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+	.then((platformRef) => {
+		const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
+		upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+	})
+	.catch(err => console.error(err));</code></pre>		
+	</details>
+
+	<p>So that's the Angular side all sorted out. Now we just need to fix up a couple of build issues on the AngularJS side.</p>
+
+	<div class="short-cut">
+		<div>Angular side <i>not</i> sorted?</div>
+		<code>git checkout step-3-angular-setup</code>
+		<code>npm install</code>
+	</div>
+	
+	<h3>Activity: Load the external dependencies</h3>
+
+	<p>Alright. If we check the browser now, we're going to see an error that will look very familiar to anyone who has done a bit of AngularJS work</p>
+
+	<div class="error">
+		Error: [$injector:modulerr] Failed to instantiate module $$UpgradeModule due to:<br>
+		Error: [$injector:modulerr] Failed to instantiate module passengr due to:<br>
+		Error: [$injector:modulerr] Failed to instantiate module ui.router due to:<br>
+		Error: [$injector:nomod] Module 'ui.router' is not available! You either misspelled the module name or forgot to load it. If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			The UpgradeModule couldn't be instantiated, because it relies on the passengr module, 
+			which couldn't be instantiated, because it relies on the ui.router module, 
+			which couldn't be instantiated because... well... we haven't included its code anywhere! 
+			This is just like our previous error where we hadn't loaded angular, because it wasn't in webpack's dependency tree.
+		</p>
+	</details>
+		
+	<p>
+		At this point, we should probably just import all the node modules that were previously being built via gulp. 
+		If you're doing this in the real world, it might be a good idea to check that you are actually using all the 
+		dependencies that you're adding to your build, before you import them.
+	</p>
+	<p>
+		Gulp's method of concatenating all the dependencies into a single file results in everything just being 
+		available in the global scope. We can do something similar, by just importing our dependencies without a name:
+	</p>
+	<pre><code>import 'angular-ui-router';</code></pre>
+	<p>
+		Doing things this way kind of loses us a bunch of the advantages of using ES modules - we're not building a proper 
+		dependency tree, so we're not even sure if we're using all the things we're importing. And everything's going to
+		end up in global scope, instead of nicely encapsulated away. But - and I think this is an important but - it's going 
+		to get things working, relatively quickly. Just try to remember to remove things when you don't need them anymore,
+		as you upgrade the app.
+	</p>
+
+	<ol>
+		<li>Import angular-ui-router in app/app.js.</li>
+		<li>Import angular-google-maps in app/app.js.</li>
+	</ol>
+
+	<details>
+		<summary>The start of app/app.js</summary>
+<pre><code>import angular from 'angular';
+import 'angular-ui-router';
+import 'angular-google-maps';
+
+export const LegacyModule = angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])</code></pre>
+	</details>	
+
+	<p>Ok, now how does the browser look?</p>
+
+	<div class="error">
+		Uncaught ReferenceError: _ is not defined
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			This error is a classic example of the problem with the gulp style of managing dependencies. 
+			<code>angular-google-maps</code> has dependencies on lodash (<code class="inline">_</code>) and a library called 
+			<code class="inline">angular-simple-logger</code>. Although this is mentioned in the <code class="inline">angular-google-maps</code> README, 
+			there's no way to communicate the information to our tooling, so we have to rely on a human reading the README. 
+			And if you've ever built anything intended for humans, you know that by-and-large, they are not good at reading.
+		</p>
+	</details>
+
+	<p>To fix this, we just need to make sure we import lodash and angular-simple-logging <i>before</i> angular-google-maps.</p>
+
+	<p class="label">In app/app.js</p>
+	<ol>
+		<li>Import <code>lodash</code></li>
+		<li>Import <code>angular-simple-logger</code></li>
+	</ol>
+
+	<details>
+		<summary>The start of app/app.js</summary>
+<pre><code>import angular from 'angular';
+
+import 'lodash';
+import 'angular-simple-logger';
+import 'angular-ui-router';
+import 'angular-google-maps';
+
+export const LegacyModule = angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])</code></pre>
+	</details>
+
+	<p>
+		Failing to import <code>angular-simple-logger</code> actually results in an error complaining about 
+		<code class="inline">nemLogging</code>. Because naming things consistently is for chumps, apparently.<br>
+		(Naming things consistently isn't actually for chumps! Please use consistent names!)
+	</p>
+
+	<p>Alright, where are we at now?</p>
+
+	<div class="error">
+		GET http://localhost:4200/controllers/main-controller.html 404 (Not Found)
+		Error: [$compile:tpload] Failed to load template: /controllers/main-controller.html (HTTP status: 404 Not Found)
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			By default, AngularJS tries to fetch our templates via an HTTP call. To make this work, you need to
+			set up your build process in such a way that the templates are all available over the network.
+			This isn't the way AngularJS projects normally work though.
+		</p>
+		<p>
+			Instead, we normally add the templates to something called the template-cache. 
+			This basically converts the HTML to JavaScript strings, 
+			which can then be included in the same way as all the other JavaScript files. 
+			In gulp, we can use a plugin like gulp-angular-templatecache to populate the template cache. 
+			You can see the output of this plugin at dist/templates.js.
+		</p>
+		<p>
+			Unfortunately, we don't have an equivalent to gulp-angular-templatecache in webpack, 
+			so we're going to need to populate the template cache manually. 
+			The good news is that we're not intending to create any new AngularJS templates, 
+			so we can just create the cache once, and check it in, rather than needing to generate it as 
+			part of the build.
+		</p>
+	</details>
+
+	<p>
+		To fix this, we need to get a list of all our HTML templates, import the HTML out of them, and add them to 
+		our template-cache. We could do this manually, like we did with the node_modules. 
+		But in a large (or even not so large) app, this is going to be tedious and error-prone.
+		So let's automate it a bit.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>
+					Use the <code>dir</code> or <code class="inline">find</code> command (depending on your OS) to generate 
+					a list of the names of all the files in the app directory that end in .html, and output it
+					to a file called app/template-cache.js.		
+				</summary>
+				<p>
+					<div class="label">Windows</div>
+					<pre><code>dir app\*.html /b/s > app/template-cache.js</code></pre>
+					<div class="label">Not Windows</div>
+					<pre><code>find app -type f -iname '*.html' > app/template-cache.js</code></pre>
+				</p>		
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>
+					Next, we need to add the contents of each HTML file to the template cache. To do this, we have to
+					<ul class="box">
+						<li>
+							<p>Extract the contents of the HTML file, using <code>require</code> and webpack's raw loader</p>
+<pre><code class="js">require('!raw-loader!.template-name.html')</code></pre>
+						</li>
+						<li>
+							<p>Pass the contents into the template cache, using the filename as the key</p>
+<pre><code class="js">$templateCache.put('template-name.html', contents)</code></pre>
+						</li>
+					</ul>
+				</summary>
+				<p>
+					You can automate this task fairly easily using regex replacements, either using a tool like <code>sed</code>,
+					or by using the find/replace functionality in your IDE.
+				</p>
+				<p class="label">In template-cache.js</p>
+				<p class="class">Find, using a regex search:</p>
+<pre><code>^app(.*)\.html$</code></pre>
+				<p>
+					This will find all lines that start with <code>app</code> and end with <code class="inline">.html</code>,
+					and save a reference to the bit in the middle.
+				</p>
+				<p class="label">Replace with:</p>
+<pre><code>$templateCache.put('$1.html', require('!raw-loader!.$1.html'));</code></pre>
+				<p class="label">Depending on your IDE, you might need to escape the '$' in the replace string:</p>
+<pre><code>\$templateCache.put('$1.html', require('!raw-loader!.$1.html'));</code></pre>
+				<p>
+					This is a slightly hacky way of using a webpack raw-loader to import things you can't import via 
+					TypeScript or ES modules.
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Wrap the contents of app/template-cache.js in an AngularJS run function.</summary>
+<pre><code>angular.module('passengr')
+	.run(function ($templateCache) { … existing contents … });</code></pre>
+				<p>
+					This function needs to be a standard function, not an arrow function, as Angular relies 
+					on some weird semantic binding thing here.
+				</p>
+			</details>
+		</li>
+		<li>
+			Import app/template-cache.js into app/app.js
+		</li>
+	</ol>
+
+	<details>
+		<summary>app/template-cache.js</summary>
+<pre><code>
+angular.module('passengr').run(function ($templateCache) {
+	$templateCache.put('/controllers/search-controller.html', require('!raw-loader!./controllers/search-controller.html'));
+	$templateCache.put('/controllers/confirm-controller.html', require('!raw-loader!./controllers/confirm-controller.html'));
+	$templateCache.put('/controllers/pickup-controller.html', require('!raw-loader!./controllers/pickup-controller.html'));
+	$templateCache.put('/controllers/driver-info-controller.html', require('!raw-loader!./controllers/driver-info-controller.html'));
+	$templateCache.put('/controllers/main-controller.html', require('!raw-loader!./controllers/main-controller.html'));
+	$templateCache.put('/directives/profile-directive.html', require('!raw-loader!./directives/profile-directive.html'));
+	$templateCache.put('/directives/user-rating-directive.html', require('!raw-loader!./directives/user-rating-directive.html'));
+});
+</code></pre>
+	</details>
+
+	<p>Surely we must be close now? What does the browser say?</p>
+
+	<div class="error">
+		Uncaught Error: [$injector:nomod] Module 'passengr' is not available! 
+		You either misspelled the module name or forgot to load it.
+		If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			This is actually the exact same problem we had with the node modules before!
+			Except this time, it's because we're failing to import our own app files, rather than external dependencies.
+		</p>
+		<p>
+			If you have a look in app.js, you'll see that we've set up some routing, 
+			pointing to a bunch of different controllers (MainCtrl, SearchCtrl, etc). 
+			These controllers are defined in the controllers directory, but we're not including them in our build in any way.
+		</p>
+	</details>
+	
+	<p>
+		We need to import all our controllers, services and directives. Luckily, we can automate this, 
+		just like we did with the template cache.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>
+					Create a list of the names of all the JavaScript files in the app directory, and output it to a file named 
+					app/legacy-imports.js		
+				</summary>
+				<p class="label">Windows</p>
+				<pre><code>dir app\*.js /b/s > app/legacy-imports.js</code></pre>
+				<div class="label">Not Windows</div>
+				<pre><code>find app -type f -iname '*.js' > app/legacy-imports.js</code></pre>
+				<p>
+					Note: if you were doing this in the Real World, you would need to make sure you didn't pick up any of
+					your test files in this list, because you don't really want them in your production build. The exact
+					command is going to depend on the naming convention you use for your test files, but something similar to 
+					<pre><code>find app -type f -iname '*.js' ! -iname '*_test.js' > app/legacy-imports.js</code></pre>
+					 ought to do the trick.
+				</p>
+			</details>
+		</li>
+		<li>
+			Remove app/app and app/legacy-imports from the list in app/legacy-imports.js, 
+			else we're going to end up with circular dependencies
+		</li>
+		<li>
+			<details>
+				<summary>Turn each line into an import statement. Once again, regex to the rescue!</summary>
+				<p class="label">Find</p>
+				<pre><code>^app(.*)\.js$</code></pre>
+				<div class="label">Replace</div>
+				<pre><code>import '.$1';</code></pre>
+			</details>			
+		</li>
+		<li>Import app/legacy-imports.js into app/app.js</li>
+		<li>Remove the import of app/template-cache.js from app/app.js (as we're now importing it via legacy-imports.js)</li>
+	</ol>
+
+	<details>
+		<summary>app/legacy-imports.js</summary>
+<pre><code>import './controllers/confirm-controller';
+import './controllers/driver-info-controller';
+import './controllers/main-controller';
+import './controllers/pickup-controller';
+import './controllers/search-controller';
+import './directives/user-rating-directive';
+import './directives/profile-directive';
+import './services/location-service';
+import './services/map-service';
+import './services/directions-service';
+import './services/geolocation-service';
+import './services/driver-service';
+import './services/trip-history-service';
+import './template-cache';
+</code></pre>
+	</details>
+
+	<details>
+		<summary>The start of app/app.js</summary>
+<pre><code>import angular from 'angular';
+
+import 'lodash';
+import 'angular-simple-logger';
+import 'angular-ui-router';
+import 'angular-google-maps';
+
+import './legacy-imports';
+
+export const LegacyModule = angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])</code></pre>			
+	</details>
+
+	<p>Surely that's everthing now? Let's check the browser again...</p>
+
+	<div class="error">
+		Uncaught Error: [$injector:nomod] Module 'passengr' is not available! 
+		You either misspelled the module name or forgot to load it. 
+		If registering a module ensure that you specify the dependencies as the second argument.
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>We just forking fixed this error, didn't we? Why has it come back?!</p>
+		<p>
+			This is a problem with how we've imported things. 
+			Because we've imported all our controllers and services <i>before</i> we initialise our main AngularJS module, 
+			they're all trying to add themselves to a module that doesn't exist yet!
+			We need to find a way to initialise our main module and then import all the rest of our code.
+		</p>
+	</details>
+
+	<p>
+		Now, it might seem like the obvious solution would be to just move the import of legacy-imports.js so 
+		that it comes after the module initialisation. Unfortunately, this doesn't work, 
+		because webpack hoists all the imports to the start of the file. 
+		So, no matter how you write your code, the imports will be the first thing that runs!
+	</p>
+
+	<p>
+		Instead, we're going create a new app entry point, which imports both the app.js and legacy-imports.js.
+	</p>
+
+	<ol>
+		<li>Create a new file: app/legacy-app.js.</li>
+		<li>Import app.js and legacy-imports.js in legacy-app.js.</li>
+		<li>Export the passengr module from legacy-app.js.</li>
+		<li>Remove the import of legacy-imports.js & the export of <code>LegacyModule</code> from app/app.js.</li>
+		<li>In src/main.ts, import <code>LegacyModule</code> from app/legacy-app.js instead of app/app.js.</li>
+	</ol>
+
+	<details>
+		<summary>app/legacy-app.js</summary>
+<pre><code>import './app';
+import './legacy-imports';
+
+export const LegacyModule = angular.module('passengr');</code></pre>		
+	</details>
+
+	<details>
+		<summary>The start of app/app.js</summary>
+<pre><code>import angular from 'angular';
+
+import 'lodash';
+import 'angular-simple-logger';
+import 'angular-ui-router';
+import 'angular-google-maps';
+
+angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])</code></pre>
+	</details>
+
+	<details>
+		<summary>The import of LegacyModule in main.ts</summary>
+		<pre><code>import { LegacyModule } from '../app/legacy-app';</code></pre>
+	</details>
+
+	<p>At this point, all our JavaScript should <i>finally</i> be loading properly.</p>
+
+	<div class="short-cut">
+		<div>JavaScript causing problems?</div>
+		<code>git checkout step-4-dependencies-loaded</code>
+	</div>
+
+	<h3>Activity: Make it pretty</h3>
+
+	<p>
+		If we check back in with our browser now, we can see some definite progress - we've got something loading on the page! 
+		It looks like rubbish, and there is still an error in the console, but it's definitely an improvement.
+	</p>
+
+	<p>Let's fix the styles first. To do this, we need to import our legacy styles into our new app.</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In src/styles.scss, import app/app.scss</summary>
+<pre><code>@import '../app/app.scss';</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>And finally, that last error</p>
+
+	<div class="error">
+			GET http://localhost:4200/images/Ellen_ripley.jpg 404 (Not Found)
+	</div>
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			Angular has a very strong opinion about where your images and other assests need to live
+			(generally src/assets, although it can be configured in angular.json). Our images are not
+			in that location, because... well, actually, it's just that we're cheating a bit with our
+			local dev server. In the Real World &trade;, you'd have a build job set up to move them
+			to where you needed them.
+		</p>
+	</details>
+
+	<p>So, we need to move our assets to the src/assets folder. Luckily, we only have one image to deal with, so this is pretty straightforward.</p>
+	<ol>
+		<li>Move images/Ellen_ripley.jpg to src/assets/images/Ellen_ripley.jpg</li>
+		<li>
+			<details>
+				<summary>Update the url of the background image in app/directives/profile-directive.js to point to assets/images/Ellen_ripley.jpg</summary>
+				<p>Line 12 of app/directives/profile-directive.js</p>
+<pre><code>element.querySelector('.profile-picture').style.backgroundImage = 'url(assets/images/Ellen_ripley.jpg)';</code></pre>
+				<p>(Incidentally, I don't recommend doing this like this, but it's unlikely you're going to be hardcoding profile pictures anyway, right?)</p>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		So obviously this is going to be much more of a pain in a real app, with pictures all over the place. I don't really have a good
+		way of automating it though, short of a global search and replace on strings ending in [jpeg|jpg|png|svg|gif].
+	</p>
+
+	<p>The good news though is that now, everything is working!</p>		
+
+	<h3>Activity: Clean up</h3>
+
+	<p>
+		There's just one more thing we should probably do before we move on. There's a few things lying around that we don't
+		need anymore, so we should clean them up.
+	</p>
+
+	<ol>
+		<li>
+			Delete the dist folder. (Angular will create it again when you run a build, but the current one has some 
+			legacy artefacts in it.)
+		</li>
+		<li>Delete gulpfile.js</li>
+		<li>Delete ./index.html (NOT the one in the src/ directory!)</li>
+		<li>Delete the gulp instructions from README.md (because keeping your readme up to date is important).</li>
+		<li>
+			<p class="label">Uninstall all the superfluous dependencies</p>
+			<pre><code>npm uninstall gulp gulp-angular-templatecache gulp-concat gulp-sass gulp-uglify-es node-sass readable-stream reload</code></pre>
+		</li>
+	</ol>
+
+	<p>
+		You'll notice, if you run <code>npm install</code> again now, the number of vulnerabilities found by npm's audit 
+		is drastically reduced - a nice side effect of upgrading.
+	</p>
+
+	<div class="short-cut">
+		<div>Want someone else to clean up for you?</div>
+		<code>git checkout step-5-upgrade-complete</code>
+		<code>npm install</code>
+	</div>
+
+	<h2 id="part-2">Part 2: Writing New Features</h2>
+
+	<p>
+		Great! The hard part is all over and done with - we can get on with the fun bit: writing new code in Angular!
+		In this section we're going to 
+	</p>
+
+	<ul>
+		<li>Create an Angular component and use it in an AngularJS template</li>
+		<li>Create an Angular component that relies on an AngularJS service</li>
+		<li>Create an Angular service, and use it in an existing AngularJS controller</li>
+		<li>Upgrade an AngularJS directive to an Angular component</li>
+	</ul>
+
+	<h3>Activity: Create an Angular Component to use in an AngularJS template</h3>
+	<p>
+		First, we're going to create a Help component that we can link to from the user profile section. 
+		(Click the hamburger menu to get to the profile section, if you haven't seen it yet).
+		This is just going to be a simple static component, with no dependencies.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Use the CLI to generate a new component named <code>HelpComponent</code>.</summary>
+				<pre><code class="bash">ng generate component help</code></pre>
+				<div class="label">or</div>
+				<pre><code class="bash">ng g c help</code></pre> 
+				<div>if you want to type less</div>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add some content to the component's HTML file. You can make up your own, or just copy-paste mine...</summary>
+<pre><code>&lt;h1&gt;Helpful help&lt;/h1&gt;
+&lt;div class="content"&gt;
+	For help, contact us at help@passengr.com between 10am and 11:30am, Tuesdays and every second Thursday
+&lt;/div&gt;</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Give your component some style! (Create your own, or just use mine, which looks just as fantastic as the rest of the app).</summary>
+<pre><code>:host {
+	background-color: var(--light-colour);
+	height: 100vh;
+	color: var(--dark-colour);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 40px;
+}
+
+.content {
+	max-width: 400px;
+}
+
+h1 {
+	margin-top: 0;
+}</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Make your component available outside the Angular root, but making it an entry component.</summary>
+				<p>In the NgModule decorator in src/app/app.module.ts, add a new property</p>
+				<pre><code>entryComponents: [HelpComponent]</code></pre>
+				<p>Don't forget to import <code>HelpComponent</code>!</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Make the component available as an AngularJS directive, by using <code>downgradeComponent</code>.</summary>
+				<p>
+					In legacy-app.js, import <code>downgradeComponent</code> from <code class="inline">@angular/upgrade/static</code>.
+					Also import the <code class="inline">HelpComponent</code>.
+				</p>
+				<p class="label">Add a new directive to the module</p>
+				<pre><code>.directive('appHelp', downgradeComponent({ component: HelpComponent }));</code></pre>
+				<p>Your app/legacy-app.js should now look like this</p>
+<pre><code>
+import './app.js';
+import './legacy-imports.js';
+import { downgradeComponent } from '@angular/upgrade/static';
+
+import { HelpComponent } from '../src/app/help/help.component';
+
+export const LegacyModule = angular.module('passengr')
+	.directive('appHelp', downgradeComponent({ component: HelpComponent }));
+
+</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add a new state to the <code>$stateProvider</code> in app/app.js, which points to the <code class="inline">appHelp</code> component.</summary>
+				<p>The new state will look like</p>
+<pre><code>.state('help', {
+	url: '/help',
+	component: 'appHelp'
+})</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>We can check out our new component by opening the browser to http://localhost:4200/help.</p>
+
+	<div class="error">
+		Error: Error while instantiating component 'HelpComponent': Not a valid '@angular/upgrade' application.
+		Did you forget to downgrade an Angular module or include it in the AngularJS application?
+	</div>
+
+	<p>Ruh-roh. Something's gone wrong!</p>
+	
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			This error is because of something we forgot to do when we were sorting out the bootstrapping
+			in src/main.ts. If we have a look at src/main.ts
+			<pre><code>upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])</code></pre>
+			We can see that we're looking for an element with an ID of 'legacy-app' in our index.html.
+			But, if we look in src/index.html, there is no such element!
+		</p>
+	</details>
+
+	<p>To fix this, we need to add the ID (and remove the ng-app property while we're there).</p>
+	<p class="label">In src/index.html</p>
+	<ol>
+		<li>Remove the <code>ng-app</code> property from the <code class="inline">main</code> element.</li>
+		<li>Add an ID of 'legacy-app' to the <code>main</code> element.</li>
+	</ol>
+
+	<details>
+		<summary>The <code>main</code> element in main/index.html</summary>
+<pre><code>&lt;main id="legacy-app"&gt;
+  &lt;ui-view&gt;&lt;/ui-view&gt;
+&lt;/main&gt;</code></pre>
+	</details>
+
+	<p>
+		If we go back to the browser now, our page should load fine, which just leaves one last thing to do -
+		add the link to the help page to the profile directive.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In app/directives/profile-directive.html, add a property <code>ui-sref="help"</code> to
+					the Help link. </summary>
+
+				<p class="label">The list of links in the profile directive should look thusly</p>
+<pre><code class="html">&lt;ul class="options"&gt;
+	&lt;li&gt;&lt;a&gt;Your trips&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;
+		&lt;a ui-sref="help"&gt;Help&lt;/a&gt;
+	&lt;/li&gt;
+	&lt;li&gt;&lt;a&gt;Payment&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a&gt;Settings&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;		
+</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		So finally, if we go back to the browser, we can open the profile sidebar and follow the link 
+		to our helpful help page.
+	</p>
+
+	<div class="short-cut">
+		<div>Need some help with your help component?</div>
+		<code>git checkout step-6-help-component</code>
+	</div>
+
+	<h3>Activity: Create an Angular Component that relies on an AngularJS service</h3>
+
+	<p>
+		Next, we're going to implement the Your Trips functionality of the profile. To do this,
+		we're going to create a new Angular component which relies on the existing trip-history service.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Generate a <code>YourTrips</code> component using the CLI.</summary>
+				<pre><code>ng generate component your-trips</code></pre>
+				<p>You should get the following output</p>
+<pre><code>CREATE src/app/your-trips/your-trips.component.scss (0 bytes)
+CREATE src/app/your-trips/your-trips.component.html (25 bytes)
+CREATE src/app/your-trips/your-trips.component.spec.ts (650 bytes)
+CREATE src/app/your-trips/your-trips.component.ts (285 bytes)
+UPDATE src/app/app.module.ts (589 bytes)</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add your new component to the <code>entryComponents</code> array in <code class="inline">AppModule</code>.</summary>
+				<pre><code>entryComponents: [HelpComponent, YourTripsComponent]</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Create an AngularJS directive out of our new component, using <code>downgradeComponent</code>, just like 
+					we did with the last component.
+				</summary>
+				<p class="label">In app/legacy-app.js, define a new downgraded component directive as part of the passengr module</p>
+				<pre><code>.directive('appYourTrips', downgradeComponent({ component: YourTripsComponent }))</code></pre>
+				<p>Don't forget to import <code>YourTripsComponent</code>.</p>
+				<p>Updated app/legacy-app.js</p>
+<pre><code>import './app.js';
+import './legacy-imports.js';
+import { downgradeComponent } from '@angular/upgrade/static';
+
+import { HelpComponent } from '../src/app/help/help.component';
+import { YourTripsComponent } from '../src/app/your-trips/your-trips.component';
+
+export const LegacyModule = angular.module('passengr')
+	.directive('appHelp', downgradeComponent({ component: HelpComponent }))
+	.directive('appYourTrips', downgradeComponent({ component: YourTripsComponent }));</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add a state for your new component to the <code>$stateProvider</code>, in app/app.js.</summary>
+<pre><code>.state('your-trips', {
+	url: '/trips',
+	component: 'appYourTrips'
+})</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Link to the <code>your-trips</code> state from the Your Trips link in the profile.</summary>
+				<p>In app/directives/profile-directive.html, add <code>ui-sref="your-trips"</code> to the Your Trip link.</p>
+				<p>The list of links should now contain</p>
+<pre><code>&lt;li&gt;
+	&lt;a ui-sref="your-trips"&gt;Your trips&lt;/a&gt;
+&lt;/li&gt;
+&lt;li&gt;
+	&lt;a ui-sref="help"&gt;Help&lt;/a&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a&gt;Payment&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a&gt;Settings&lt;/a&gt;&lt;/li&gt;</code></pre>
+			</details>
+		</li>
+		<li>
+			Check that your new directive works by opening the profile and clicking the Your Trips link.
+			You should see a page with the words "your-trips works!"
+		</li>
+	</ol>
+
+	<p>
+		So now we have a component, the next thing we need to do is to pass a list of trips into it.
+		The list of trips is available from <code>TripHistoryService.getTrips()</code>, but <code class="inline">TripHistoryService</code>
+		is an AngularJS service, so the Angular dependency injector doesn't know about it, and can't pass it into the 
+		component. Let's fix that.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Create an Angular factory which receives the AngularJS injector as a dependency, and returns <code>TripHistoryService</code>.</summary>
+				<p>In src/app/app.module.ts, add the following function</p>
+<pre><code>export function tripHistoryServiceFactory(i: any) {
+	return i.get('TripHistoryService');
+}		 
+</code></pre>
+
+				<p>
+					The <code>i</code> here is referring to the AngularJS injector. <code class="inline">'TripHistoryService'</code> needs to be 
+					whatever name you registered the service with in the AngularJS module. Make sure you export the function so
+					it can be picked up by the AOT compiler.
+				</p>
+				<p>
+					In this activity, we're going to just add our factory to our <code>AppModule</code> file. If you have a big 
+					project, creating lots of these factories, you might want to put them all together in a separate file and 
+					import that file into the module.
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Provide our new factory to our <code>AppModule</code>, including the AngularJS injector as a dependency.</summary>
+				<p>Add a <code>providers</code> array to the <code class="inline">AppModule</code> decorator, with one entry</p>
+<pre><code>providers: [{
+	provide: 'TripHistoryService',
+	useFactory: tripHistoryServiceFactory,
+	deps: ['$injector']
+}],</code></pre>
+				<p>
+					In this bit of code, <code>'TripHistoryService'</code> is the name that we will use to refer to the factory 
+					when we're injecting it in Angular components. It can be whatever you like. <code class="inline">tripHistoryServiceFactory</code>
+					is the function we created in the previous step. <code class="inline">'$injector'</code> refers to the AngularJS injector.
+				</p>
+				<p>
+					Normally, when you're providing a service in Angular, you just give the class name. This is essentially equivalent 
+					to 
+				</p>
+<pre><code class="json">{
+	provide: MyAngularService,
+	useClass: MyAngularService
+}</code></pre>
+			<p>
+				You can think of <code>provide</code> as a key in a map of dependencies, and <code class="inline">useClass</code> as the value.
+				In this case, the key that the injector uses is the same as the value. This works kind of like magic, because
+				when you go to inject <code class="inline">MyAngularService</code> somewhere, the injector can infer the key, based on the type
+				in the component constructor parameter list. Our AngularJS service doesn't have a type associated with it though, so we have
+				to give it an explicit key - the string <code class="inline">'TripHistoryService'</code>.
+			</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Inject our new service into <code>YourTripsComponent</code>.</summary>
+				<p>
+					Because we've used a string for our injector key, we need to use a special decorator to inject our service
+				</p>
+				<pre><code>constructor(@Inject('TripHistoryService') private tripHistoryService: any){ }</code></pre>
+				<p>
+					We also have to use a type of <code>any</code>, or create a type for our service. I'd actually recommend
+					creating a type - using <code class="inline">any</code> is super inconvenient, because you lose all your type checking!
+					We're not going to do that today though. We're just going to tough it out.
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Create a <code>trips</code> property in the <code class="inline">YourTripsComponent</code> class and populate it from 
+					<code class="inline">tripHistoryService.getTrips()</code>.</summary>
+				<p class="label">Create the property</p>
+				<pre><code>trips: Promise&lt;any&gt;;</code></pre>
+				<p>(Again, we would ideally create a type for this value, but we're really slumming it today).</p>
+				<div class="label">In <code>ngOnInit</code></div>
+				<pre><code>this.trips = this.tripHistoryService.getTrips();</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Check the service is working by outputting the raw JSON into the template.</summary>
+				<p>
+					We can do this super easily via a combination of the <code>async</code> pipe and <code class="inline">json</code> pipe,
+					in src/app/your-trips-component/your-trips.component.html.
+				</p>
+<pre><code>&lt;ul&gt;
+	&lt;li *ngFor="let trip of trips | async"&gt;{{ trip | json }}&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Once you're satisfied that you're getting the trip data from the service, create a nicer template that shows
+					date, time, price, car and rating for each trip. You can create your own design, or just copy/paste mine.
+				</summary>
+				<p class="label">src/app/your-trips-component/your-trips.component.html</p>
+<pre><code>&lt;h1>Your Trips&lt;/h1>
+&lt;ul&gt;
+	&lt;li *ngFor="let trip of trips | async"&gt;
+		&lt;div&gt;{{trip.date}}, {{trip.time}}&lt;/div&gt;
+		&lt;div&gt;{{trip.price | currency}}&lt;/div&gt;
+		&lt;div&gt;{{trip.car}}&lt;/div&gt;
+		&lt;div&gt;{{trip.rating}} stars&lt;/div&gt;
+	&lt;/li&gt;
+&lt;/ul&gt;		
+</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Style it up. Again, you can use mine, but I completely understand if you'd prefer to use your own.</summary>
+				<p class="label">src/app/your-trips-component/your-trips.component.scss</p>
+<pre><code>h1 {
+	background: var(--medium-colour);
+	color: var(--light-colour);
+	padding: 1em;
+	margin: 0;
+	font-size: 24px;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+	color: var(--dark-colour);
+}
+
+li {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	padding: 1em;
+}
+
+li div:nth-child(2n) {
+	text-align: right;
+}
+
+li:not(:last-child) {
+	border-bottom: 1px solid var(--medium-colour);
+}		
+</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>The profile is starting to look pretty sweet now!</p>
+
+	<div class="short-cut">
+		<div>Profile not looking sweet at all?</div>
+		<code>git checkout step-7-trip-history-component</code>
+	</div>
+
+	<h3>Activity: Create an Angular service and retrofit it into an AngularJS controller</h3>
+
+	<p>
+		So, the app's going pretty well, but we really need a feature that's going to differentiate us from all those 
+		other rideshare apps out there. To do that, we're going to switch tacks for a little while, and add a new feature
+		to our existing <code>driver-info-controller</code>: once a driver has been found, we're going to tell the user 
+		whether or not they need a jacket, depending on the weather!
+	</p>
+
+	<p>
+		To do this, we're going to use the existing <a href="https://doineedajacket.com/" target="_blank">DoINeedAJacket</a> 
+		service. Unfortunately, DoINeedAJacket doesn't provide an API, so we're going to do some screen-scraping. DO NOT DO
+		THIS IN A PRODUCTION APP. It's dodgy as h*ck, and probably goes against all kinds of terms of use. We're just doing 
+		it here, because it was a quick way to get this feature up and running. 
+	</p>
+
+	<p>
+		In order to make this all work, we're going to need to create a new Angular service, which calls DoINeedAJacket's 
+		endpoint, and passes in the user's current latitude and longitude. Our new service will need to fetch the latitude 
+		and longitude from our existing AngularJS <code>GeolocationService</code>, which means we'll need to upgrade that
+		service and inject it into our new service. Finally, we'll need to inject our new service into 
+		<code class="inline">driver-info-controller</code>, fetch the jacket data, and display it in the related template. Phew.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Create a new Angular service named <code>JacketService</code>.</summary>
+				<pre><code>ng generate service jacket</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Create an Angular factory function that returns the existing <code>GeolocationService</code>, so that we 
+					can provide it to our new <code class="inline">JacketService</code>.
+				</summary>
+				<p class="label">Create a new function in src/app/app.module.ts, just like we did with <code>TripHistoryService</code></p>
+<pre><code>export function geolocationServiceFactory(i: any) {
+	return i.get('GeolocationService');
+}		</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Provide our new factory service to <code>AppModule</code>.</summary>
+				<p class="label">Add a new entry to the <code>providers</code> array in the <code class="inline">AppModule</code> decorator</p>
+<pre><code class="json">{
+	provide: 'GeolocationService',
+	useFactory: geolocationServiceFactory,
+	deps: ['$injector']
+}
+</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Inject <code>GeolocationService</code> into our new <code class="inline">JacketService</code>.</summary>
+				<p class="label">In the constructor for <code>JacketService</code></p>
+				<pre><code>constructor(@Inject('GeolocationService') private geolocationService) {}</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>We're also going to need the <code>HttpClient</code>, so let's inject that too.</summary>
+				<p class="label">The constructor for <code>JacketService</code></p>
+<pre><code>constructor(
+	@Inject('GeolocationService') private geolocationService,
+	private http: HttpClient
+) {}</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Fetch the information we need from DoINeedAJacket. Honestly, just close your eyes and copy/paste the following code.</summary>
+<pre><code>isJacketNeeded(): Observable&lt;boolean&gt; {
+	return this.geolocationService.getCurrentPosition()
+		.then(location => location.coords)
+		.then(({latitude, longitude}) => this.http.get(`https://doineedajacket.com/a.php?snd=true&lat=${latitude}&lon=${longitude}`).toPromise())
+		.then((response) => {
+			const element = document.createElement('div');
+			element.innerHTML = response.dinaj;
+			return element.querySelector('.dinaj_h1').textContent === 'Yes';
+		});
+}</code></pre>
+			<p>
+				This function will return <code>true</code> if the user needs a jacket at their current location, or <code class="inline">false</code> otherwise.
+				Unless DoINeedAJacket ever change their page in any way.
+			</p>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		Now, to use this new service in our AngularJS controller, we need to downgrade it, and add it to the passengr module,
+		just like we did with our components earlier. The key difference is that we'll be creating a factory, rather than 
+		a directive, and we'll downgrade it via <code>downgradeInjectable</code> instead of <code class="inline">downgradeComponent</code>.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Add <code>downgradeInjectable</code> to the import of <code class="inline">downgradeComponent</code> in app/legacy-app.js.</summary>
+				<p class="label">The import should now look like</p>	
+				<pre><code>import { downgradeComponent, downgradeInjectable } from '@angular/upgrade/static';</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add a new factory to the module, by downgrading <code>JacketService</code>.</summary>
+				<pre><code>.factory('JacketService', downgradeInjectable(JacketService))</code></pre>
+				<p class="label">The complete module definition should now be</p>
+<pre><code>export const LegacyModule = angular.module('passengr')
+	.directive('appHelp', downgradeComponent({ component: HelpComponent }))
+	.directive('appYourTrips', downgradeComponent({ component: YourTripsComponent }))
+	.factory('JacketService', downgradeInjectable(JacketService));</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Don't forget to import <code>JacketService</code> if your IDE didn't do it automatically.</summary>
+				<pre><code>import { JacketService } from '../src/app/jacket.service';</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>And finally, we can use our new service in <code>driver-info-controller</code> and its associated template!</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Inject <code>JacketService</code> into <code class="inline">driver-info-controller</code>.</summary>
+				<p class="label">In app/controllers/driver-info-controller.js</p>
+				<pre><code>.controller('DriverInfoCtrl', async function ($scope, DriverService, driver, JacketService) {</code></pre>
+		</li>
+		<li>
+			<details>
+				<summary>Fetch the jacket information from <code>JacketService</code>, convert it into display text, and add it to the scope.</summary>
+				<p>
+					We're going to add a line to the template that says "You will|won't need a jacket", so we need to convert the response
+					from <code>JacketService</code> into the word "will" or the word "won't".
+				</p>
+				<p class="label">In the controller function in app/controller/driver-info-controller.js</p>
+<pre><code>JacketService.isJacketNeeded().then((needed) => {
+	$scope.jacketVerb = needed ? 'will' : 'won\'t';
+});</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add our new feature to the driver-info template, to be enjoyed by all...</summary>
+				<p class="label">Inside the <code>&lt;div class="pickup"&gt;</code>, add a new line</p>
+				<pre><code>&lt;div&gt;You {{jacketVerb}} need a jacket&lt;/div&gt;</code></pre>
+			</details>
+		</li>
+		<li>
+			Order a driver and find out if you need a jacket!
+		</li>
+	</ol>
+
+	<div class="short-cut">
+		<div>Can't work out if you need a jacket?</div>
+		<code>git checkout step-8-jacket-service</code>
+	</div>
+
+	<h3>Activity: Use an AngularJS directive as an Angular component</h3>
+
+	<p>
+		The last upgrade task we're going to try is upgrading an AngularJS directive. This is the trickiest 
+		upgrade, as it will only work under certain circumstances. If we have a look at the ng-upgrade documentation 
+		from the angular.io... 
+	</p>
+
+	<div class="quote">
+		<p>To be Angular compatible, an AngularJS component directive should configure these attributes:</p>
+
+		<ul>
+			<li>restrict: 'E'. Components are usually used as elements.</li>
+			<li>
+				scope: {} - an isolate scope. In Angular, components are always isolated from their surroundings, 
+				and you should do this in AngularJS too.
+			</li>
+			<li>bindToController: {}. Component inputs and outputs should be bound to the controller instead of using the $scope.</li>
+			<li>controller and controllerAs. Components have their own controllers.</li>
+			<li>template or templateUrl. Components have their own templates.</li>
+		</ul>
+
+		<p>Component directives may also use the following attributes:</p>
+		
+		<ul>
+			<li>transclude: true/{}, if the component needs to transclude content from elsewhere.</li>
+			<li>require, if the component needs to communicate with some parent component's controller.</li>
+		</ul>
+
+		<p>Component directives <b>should not</b> use the following attributes:</p>
+		
+		<ul>
+			<li>compile. This will not be supported in Angular.</li>
+			<li>
+				replace: true. Angular never replaces a component element with the component template. 
+				This attribute is also deprecated in AngularJS.
+			</li>
+			<li>
+				priority and terminal. While AngularJS components may use these, 
+				they are not used in Angular and it is better not to write code that relies on them.
+			</li>
+		</ul>
+		<a class="attribution" href="https://angular.io/guide/upgrade#using-component-directives">
+			Using component directives on angular.io
+		</a>
+	</div>
+
+	<p>
+		Basically, the rule is that if your directive <i>could have</i> been created using the <code>component()</code>
+		function introduced in AngularJS 1.5, then you should be fine. If your app is pre-1.5, the chances of you 
+		having directives like this are a little lower, but you still might be ok. As far as I can tell, the most 
+		important requirement is that your directive has a controller, rather than a compile function. 
+	</p>
+
+	<p>
+		We're going to try to upgrade the <code>user-rating</code> directive, which is used to display the stars
+		in the User Profile. If you recall, our Trip History component also displays the star rating, so it would 
+		make sense for it to use this same directive. And, if we compare it to the list above, it has <i>most</i>
+		of the properties of a component.
+	</p>
+
+	<ul>
+		<li class="no">restrict 'E'</li>
+		<li class="yes">isolate scope</li>
+		<li class="no">bindToController</li>
+		<li class="sort-of">controller/controllerAs</li>
+		<li class="yes">template/templateUrl</li>
+		<li class="yes"><b>No</b> compile function</li>
+		<li class="yes"><b>Not</b> replaced</li>
+		<li class="yes"><b>No</b> priority or terminal</li>
+	</ul>
+
+	<p>
+		So our directive isn't restricted to elements, but it easily could be. It's not using <code>bindToController</code>,
+		and it has a controller, but no <code class="inline">controllerAs</code>. So let's see how we go!
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Update our directive definition to be restricted to elements.</summary>
+				<p class="label">In app/directives/user-rating-directive.js, update the directive definition to</p>
+<pre><code>return {
+	restrict: 'E',
+	templateUrl: '/directives/user-rating-directive.html',
+	scope: {
+		stars: '='
+	},
+	controller: function ($scope) { ... }</code></pre>
+				<p>
+					This isn't strictly necessary (the upgrade will work without it), but it is good practice to be clear 
+					about these things (and it probably should have been there anyway, regardless of the upgrade).
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Create an Angular directive to wrap our AngularJS directive, allowing it to communicate with Angular APIs.</summary>
+				<p>
+					We're just going to create this directive in app/app.module.ts, like we did with our factory functions. In the 
+					real world though, you'd probably want to separate these out into their own file, for easier management.
+				</p>
+				<p class="label">In app/app.module.ts, <i>before</i> the module declaration</p>
+<pre><code>@Directive({selector: 'app-user-rating'})
+export class UserRatingComponentWrapper extends UpgradeComponent {
+	@Input() stars: number;
+
+	constructor(elementRef: ElementRef, injector: Injector) {
+		super('userRating', elementRef, injector);
+	}
+}</code></pre>
+				<ul>
+					<li>
+						<code>app-user-rating</code> is the selector we're going to use to refer to the directive in Angular templates.
+						It can be anything you like, but it <i>must</i> be different to the AngularJS selector, else there will be
+						confusions. If you're using the CLI with the default linter, it will also need to start with <code class="inline">app-</code>
+					</li>
+					<li>The class name (<code>UserRatingComponentWrapper</code>) can be anything you like, but I recommend establishing a standard naming convention.</li>
+					<li><code>@Input() stars: number;</code> links the component attributes to the $scope.</li>
+					<li>
+						<code>super('userRating', elementRef, injector);</code> instantiates the underlying AngularJS directive.
+						<code class="inline">userRating</code> here needs to be the name the directive was registered with (not its selector).
+					</li>
+				</ul>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Add our new directive to <code>AppModule</code>'s declarations.</summary>
+				<p class="label">In app/app.module.ts</p>
+<pre><code>@NgModule({
+	declarations: [
+		AppComponent,
+		HelpComponent,
+		YourTripsComponent,
+		UserRatingComponentWrapper
+	], ...</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Replace the rating text in the Your Trips component with our new component.</summary>
+				<p class="label">In src/app/your-trips/your-trips.component.html, replace the last <code>div</code> with</p>
+				<pre><code>&lt;app-user-rating [stars]="trip.rating"&gt;&lt;/app-user-rating&gt;</code></pre>
+				<p>Note that you need to use the Angular-style input notation - <code>[stars]</code></p>
+			</details>
+		</li>
+	</ol>
+
+	<p>Check it out in the browser... oh noes! The styling is all missing!</p>
+
+	<details class="info">
+		<summary>Why did this happen?</summary>
+		<p>
+			If we have a look in app/directives/user-rating-directive.scss, we can see that the CSS is selecting the
+			<code>user-rating</code> element. But our new component is an <code class="inline">app-user-rating</code> element!
+		</p>
+	</details>
+
+	<ol>
+		<li>
+			<details>
+				<summary>	Add <code>app-user-rating</code> to the <code class="inline">user-rating</code> selector in app/directives/user-rating-directive.scss.</summary>
+				<pre><code>user-rating, app-user-rating {</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		Ok, so it looks a bit better now, but the stars aren't being coloured in properly still.
+	</p>
+
+	<details class="info">
+		<summary>What's going on here?</summary>
+		<p>
+			If we have a look in app/directive/user-rating-directive.html, we can see that we're using a property called 
+			<code>fill</code> to add a class to each star that determines if it is filled or empty. The values in  
+			<code class="inline">$scope.fill</code> are being set inside the loop in the controller in app/directives/user-rating-directive.js.
+		</p>
+
+		<p>
+			Go ahead and add <code>console.log($scope.fill)</code> at the end of the controller, then have a look at what's
+			being logged in the browser. Go on, I'll wait here.
+		</p>
+
+		<p>...</p>
+
+		<p>...</p>
+
+		<p>
+			The array is empty, right? Why on earth would that be happening? Well, what happens if we log the value of 
+			$scope.stars? It's undefined!
+		</p>
+
+		<p>
+			The reason for this is that Angular doesn't populate <code>@Input()</code> values until after the constructor 
+			has run. The reasoning here is that the object produced by a constructor should rely only on its parameters, and
+			the code in the constructor itself. The <code class="inline">@Input()</code> values aren't passed in as parameters, and they're 
+			not set as part of the constructor that you write, so they shouldn't exist on the newly constructed object.
+		</p>
+
+		<p>
+			Obviously, you need to have access to these values once they are populated, so Angular provides us with the 
+			<code>ngOnInit</code> callback, which is called after the constructor has run and the <code class="inline">@Input()</code> values 
+			have been populated. If you've written any Angular code, I'm sure you're well familiar with it.
+		</p>
+
+		<p>
+			So how does this translate into AngularJS, where there's no constructor, and no <code>ngOnInit</code> callback?
+			Well, it turns out there <i>is</i> a constructor - the controller function itself is called as a constructor, 
+			with the <code class="inline">new</code> keyword, by the AngularJS framework code. So our <code class="inline">$scope</code> variables (which 
+			are passed in via the <code class="inline">@Input()</code> variable in the wrapper component) aren't available until after our 
+			constructor has run. Fortunately, AngularJS has an equivalent to <code class="inline">ngOnInit</code> - <code class="inline">$onInit</code>.
+			<code class="inline">$onInit</code> was first introduced in AngularJS 1.5, with components, but it's also available to use in
+			AngularJS 1.4, through the magic of ng-upgrade!
+		</p>
+	</details>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Move the loop logic into a function called <code>this.$onInit</code>.</summary>
+				<p class="label">The controller in app/directives/user-rating-directive.js should now look a little something like this:</p>
+<pre><code>controller: function ($scope) {
+
+	this.$onInit = () => {
+		$scope.fill = [];
+		const rating = Math.round($scope.stars);
+		for (let i = 0; i < rating; i++) {
+			$scope.fill[i] = true;
+		}
+
+	}
+}</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		At this point, everything is working fine, but the stars don't look great against the light background.
+		To fix this, I just added a dark outline around the filled stars.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Set the <code>stroke</code> of filled stars to <code class="inline">--dark-colour</code></summary>
+				<p>The style for <code>path.fill</code> in app/directives/user-rating-directive.scss should look thusly</p>
+<pre><code>path.fill {
+	fill: var(--light-colour);
+	stroke: var(--dark-colour);
+}</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<div class="short-cut">
+		<div>Need some direction with your directive?</div>
+		<code>git checkout step-9-upgraded-directive</code>
+	</div>
+
+	<hr>
+
+	<p>
+		At this point, we have all the tools we need to get started on our upgrade journey. We can
+	</p>
+	<ul>
+		<li>Create an ng-upgrade hybrid app, controlled via our existing AngularJS app.</li>
+		<li>Create brand new Angular features, which might rely on existing AngularJS features.</li>
+		<li>Update existing AngularJS features to use newly created Angular features.</li>
+		<li>
+			Recognise that sometimes it's going to be better to re-write AngularJS features in Angular 
+			than try and upgrade them.
+		</li>
+	</ul>
+
+	<h2 id="part-3">Part 3: Handing Control to Angular</h2>
+
+	<p>
+		The previous sections should have given you a good idea on how to get <i>started</i> on your upgrade path, but how do you 
+		<i>finish?</i> At some point, the amount of Angular in your codebase is going to start outweighing the amount of AngularJS,
+		and you're going to want to look at passing control of the app over to the Angular side. A big part of that will involve 
+		switching the routing from the current ui-router or ng-router based routing to the new Angular router.
+	</p>
+
+	<p>Before we get started on that though, let's do a little house-keeping.</p>
+
+	<h3>Activity: Switch to HTML5 routing</h3>
+
+	<p>
+		You've probably noticed that the URLs our app uses are currently all of the form /#/my-route.
+		We're going to get rid of that unsightly # in the route, which will make our app feel a little more modern.
+		Hashless routing is also the default for the Angular router, so it'll make the switch easier.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In the config function in app/app.js, call <code>$locationProvider.html5Mode(true)</code>.</summary>
+<pre><code>.config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
+	$locationProvider.html5Mode(true);
+	$urlRouterProvider.otherwise('/map/search');
+	
+	...</code></pre>
+			<p>The order that you call <code>$locationProvider</code> and <code class="inline">$urlRouterProvider</code> doesn't matter.</p>
+			</details>
+		</li>
+	</ol>
+
+	<p>Now we can access our app via http://localhost:4200/map/search. Isn't that much nicer?</p>
+
+	<h3>Activity: Create an Angular root</h3>
+
+	<p>
+		Currently the root of the app is controlled by AngularJS. The Angular part is essentially just a collection of components and 
+		services that are embedded in the AngularJS app. We want to change this so that we have both an Angular app and an 
+		AngularJS app running side by side.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In src/index.html, replace the <code>main</code> element with an <code class="inline">app-root</code> element.</summary>
+<pre><code>&lt;body>
+	&lt;app-root>&lt;/app-root>
+	&lt;script src="//maps.googleapis.com/maps/api/js?key=AIzaSyCKwKMt_VIYXsJRi7NPA1DpE-hmXF8v41Y&libraries=places">&lt;/script>
+&lt;/body></code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>In <code>AppModule</code>, replace the bootstrap of <code class="inline">AppComponent</code> that we removed earlier.</summary>
+<pre><code>bootstrap: [AppComponent]</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		Angular will now load the Angular app, instead of the AngularJS app. If you check the browser, you should see the default 
+		Angular app start page.
+	</p>
+
+	<h3>Activity: Load AngularJS routing from Angular</h3>
+
+	<p>
+		That's not really what we want though, is it? What we want is for our Angular app to load all our existing AngularJS routes.
+		To do that, we need an AngularJS router outlet in our Angular app.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In src/app/app.component.html, replace the default contents with a <code>ui-view</code> outlet, using the class-based selector.</summary>
+<pre><code>&lt;div class="ui-view">&lt;/div></code></pre>
+				<p>
+					It's important to use the class-based selector here. If you create a <code>&lt;ui-vew&gt;</code> element, Angular will 
+					realise that there's an element it doesn't understand in one of its templates and throw a tantrum until you either 
+					explain exactly what the element is, or convince it to ignore elements it doesn't understand. Neither of these options 
+					is particularly fun, so it's just easier if Angular never finds out.
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>In src/main.ts, fix the bootstrap of the AngularJS module by passing in an element that still exists.</summary>
+				<p>
+					Remember when we deleted the 'legacy-app' element in src/index.html? src/main.ts was kind of relying on that, so now
+					we need to give it a different element. <code>document.body</code> will do fine.
+				</p>
+<pre><code>upgrade.bootstrap(document.body, [ LegacyModule.name ])</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>Ok, now our app is all working again, let's see if we can break it some more.</p>
+
+	<h3>Activity: Add Angular routing</h3>
+
+	<p>Let's start by adding some Angular routing.</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Create a file named src/app/app-routing.module.ts and initialise a routing module in it.</summary>
+<pre><code>import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [];
+
+@NgModule({
+	imports: [RouterModule.forRoot(routes)],
+	exports: [RouterModule],
+})
+export class AppRoutingModule { }</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Import the new routing module into <code>AppModule</code>.</summary>
+<pre><code>imports: [
+  BrowserModule,
+  UpgradeModule,
+  HttpClientModule,
+  AppRoutingModule
+],</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>Yep, we broke it.</p>
+
+	<div class="error">ERROR Error: Uncaught (in promise): Error: Cannot match any routes. URL Segment: 'map/driver-info'</div>
+
+	<details class="info">
+		<summary>What does this error mean?</summary>
+		<p>
+			Now that we've created a routing module, Angular expects to handle all the routing. Problem is, it doesn't actually know 
+			about any of our routes, so it's all confused.
+		</p>
+	</details>
+
+	<p>
+		To sort this issue out, we need to tell Angular to ignore all the routes that are already handled in AngularJS.
+		At the moment, that's all of them!
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Create a class which extends <code>UrlHandlingStrategy</code> and doesn't handle any URLs.</summary>
+				<p class="label">In src/app/app-routing.module.ts, <i>before</i> the declaration of the routing module</p>
+<pre><code class="js">class Ng1Ng2UrlHandlingStrategy implements UrlHandlingStrategy {
+  shouldProcessUrl(url) { return false; }
+  extract(url) { return url; }
+  merge(url, whole) { return url; }
+}</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Provide <code>Ng1Ng2UrlHandlingStrategy</code> to the routing module.</summary>
+<pre><code>@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+  providers: [{ provide: UrlHandlingStrategy, useClass: Ng1Ng2UrlHandlingStrategy }]
+})
+export class AppRoutingModule { }</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>Right, everything should be working pretty much exactly as it was before, except now Angular is in control.</p>
+
+	<h3>Activity: Move the Help page to the Angular router</h3>
+
+	<p>
+		Now we're ready to start moving things to the Angular router. This is going to be easiest in situations where all the code 
+		within a route has been written in Angular (no ng-upgraded components/services). It's possible to do in other situations, but 
+		it's going to be easier if the entire route is at least written in TypeScript or ES modules. Beyond that, it gets increasingly 
+		difficult and hacky. To be honest, even the simple case we're going to tackle here is going to be a little hacky. Take solace 
+		in the fact that it's better than having a load of legacy code (and it really is intended to only be a temporary patch, until 
+		you can upgrade the rest of the code).
+	</p>
+
+	<p>
+		Let's try the simplest possible case - moving the (practically static) Help page to the Angular router.
+	</p>
+
+	<ol>
+		<li>
+			Delete the 'help' state in the state config in app/app.js. Now we're committed! (And, if this does end up working, we can 
+			be sure that it's because the Angular router is working, not because we forgot to delete something in AngularJS.)
+		</li>
+		<li>
+			<details>
+				<summary>Add a <code>router-outlet</code> to src/app/app.component.html.</summary>
+<pre><code class="html">&lt;div class="ui-view">&lt;/div>
+&lt;router-outlet>&lt;/router-outlet></code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Create a route for the help page in the router module.</summary>
+<pre><code>const routes: Routes = [
+  {
+    path: 'help',
+    component: HelpComponent
+  }
+];</code></pre>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Update our UrlHandlingStrategy to allow Angular to handle a url of '/help'.</summary>
+<pre><code>shouldProcessUrl(url) { return url.toString() === '/help'; }</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>Now in an ideal world, this would all just work. You can go check if that's what happens by opening the browser at http://localhost:4200/help.</p>
+
+	<p>No, that isn't what happens. Of course that isn't what happens. Instead, the page redirects immediately back to /map/search.</p>
+
+	<details class="info">
+		<summary>Why does this happen? Why can't anything just <i>work</i>?</summary>
+		<p>
+			The Angular router and ui-routers <code>$urlRouterProvider</code> are fighting and, for some
+			reason, the <code class="inline">$urlRouterProvider</code> is winning. I'm not actually sure why. But, the upshot of it all is 
+			that <code class="inline">$urlRouterProvider</code> doesn't recognise the /help URL, so it passes it to its 'otherwise' handler,
+			which redirects back to /map/search.
+		</p>
+	</details>
+
+	<p>To fix this, we're going to get rid of that default redirect.</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In the config function in app/app.js, remove all traces of <code>$urlRouterProvider</code>.</summary>
+				<p class="label">The start of the config function should end up like</p>
+<pre><code>.config(function ($stateProvider, $locationProvider) {
+  $locationProvider.html5Mode(true);
+
+  $stateProvider
+	  ... </code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<p>
+		It should be noted that this fix actually changes the behaviour of the app, as it's no longer going to automatically redirect to
+		the start page if the user enters an invalid URL. In a production app, this probably wouldn't be ok. I don't know a good solution 
+		for this, but I can think of a hacky one! (Most of the solutions I've thought of that have to do with the interaction between the 
+		Angular router and ui-router are pretty hacky.)
+	</p>
+
+	<p>
+		In the Angular router, provide a handler for the default route '**'. Make it route to a dummy component, or a 404 page or something.
+		Add a guard to this route. The guard should check whether the current route is a valid route (in either the Angular router or 
+		ui-router). If it isn't, then it should redirect to your default route (/map/search) in this case.
+	</p>
+
+	<p>
+		It's probably going to be a bit awkward to manage the ui-router routes in this guard, but think how fun it will be deleting them 
+		out of the guard once they've been switched over to Angular!
+	</p>
+
+	<hr>
+
+	<p>
+		Ok, where were we? Does http://localhost:4200/help work now? It actually does! Don't get too excited though, there's still one 
+		little thing left to check - can we navigate to the help page from the link in the profile?
+	</p>
+
+	<p>No, of course we can't.</p>
+
+	<details class="info">
+		<summary>Ok, what even is going on now?</summary>
+		<p>
+			When you create a ui-router link, using the <code>ui-sref</code> attribute, ui-router converts that <code class="inline">ui-sref</code>
+			into an <code class="inline">href</code> attribute, magically causing the browser to treat it as a link. ui-router is picky though,
+			and will only convert a <code class="inline">ui-sref</code> into <code class="inline">href</code> if it recognises the state 
+			(and the state has a URL). We deleted the 'help' state from our router, so it knows nothing about it.
+		</p>
+	</details>
+
+	<p>
+		Now, you might think that the simple way to fix this is to just use an <code>href</code> straight up. Wouldn't that be nice?
+		Yeah - go ahead and try it... 
+	</p>
+
+	<p>
+		Doesn't work. The URL changes, but neither of the routers get notified, so the page doesn't change. We need a way to have one of 
+		our routers in control of that link!
+	</p>
+
+	<div class="error">Warning. Hack ahead.</div>
+
+	<p>
+		To fix this, we're going to create a fake help state in ui-router which is going to just forward us to /help, allowing the
+		Angular router to notice the change.
+	</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>Create a 'help' state in the router config in app/app.js, with a URL of 'legacy-help'.</summary>
+<pre><code>.state('help', {
+  url: '/legacy-help',
+});</code></pre>
+				<p>
+					You can use any URL you want, it's never going to be used anywhere else. Don't use '/help' though, or you'll
+					end up stuck in an endless redirect loop as the two routers fight over who owns that path.
+				</p>
+			</details>
+		</li>
+		<li>
+			<details>
+				<summary>Give the fake state a controller, which just redirects to /help.</summary>
+<pre><code>.state('help', {
+  url: '/legacy-help',
+	controller: () => { location = 'help'; }
+});</code></pre>
+			<p>
+				If you use an arrow function, like I have here, make sure you wrap the body of the function in braces. If you don't,
+				the function will return the value of <code>location = 'help'</code>, which is <code class="inline">undefined</code>.
+				AngularJS controllers are called as constructors, which automatically return an object <i>unless you explicitly return 
+				something else</i>. In this case, we'd return <code class="inline">undefined</code>. Angular is most definitely not 
+				expecting a controller to be <code class="inline">undefined</code>, so this would cause all kinds of problems.
+			</p>
+			</details>
+		</li>
+	</ol>
+
+	<p>Ok, so we've fixed that problem. Surely that's everything now?</p>
+
+	<p>
+		Nearly. There's just one more little thing, I promise. Try following the link in the profile to the help page, then hitting 
+		the browser back button. What happens? You end up back on the help page!
+	</p>
+
+	<details class="info">
+		<summary>Just why.</summary>
+		<p>
+			Well, from /help, we go back to /legacy-help, which then redirects us to /help.
+		</p>
+	</details>
+
+	<div class="error">Caution. More hacks.</div>
+
+	<p>Look, I'm not even going to explain this one. It's awful, but it fixes it.</p>
+
+	<ol>
+		<li>
+			<details>
+				<summary>In the controller, add a check to see whether the previous page was /help. If it was, don't do the redirect.</summary>
+<pre><code>.state('help', {
+	url: '/legacy-help', 
+	controller: () => { 
+    if (history.go(-1) !== 'help') {
+      location = 'help';
+    }
+  }
+});</code></pre>
+			</details>
+		</li>
+	</ol>
+
+	<div class="short-cut">
+		<div>Not sure which route to take?</div>
+		<code>git checkout step-10-angular-routing</code>
+	</div>
+
+	<h2>Summary</h2>
+
+	<p>
+		And that's it. You should now understand the process involved to create a hybrid app, build new features, and eventually,
+		transition entirely to Angular. You should also have an idea of the kind of errors you might run into along the way, as 
+		well as a good understanding of the principles involved in the upgrade, which should help you solve any problems you run 
+		into along the way. And hopefully, you also have a good sense of perspective - when it's worth doing things properly, and 
+		when a small hack will probably be ok.
+	</p>
+
+	<p>
+		For more information, check out
+	</p>
+	<ul>
+		<li>
+			<a href="https://angular.io/guide/upgrade">The upgrade guide on angular.io</a>. Keep in mind though that this guide 
+			really concentrates on a best-case scenario that probably doesn't apply in a legacy app.
+		</li>
+		<li>
+			I also found this 
+			<a href="https://vsavkin.com/migrating-angular-1-applications-to-angular-2-in-5-simple-steps-40621800a25b">
+			migration guide from Victor Savkin of nrwl.io
+			</a>
+			quite helpful for the latter stages of migration. Again, it assumes a more ideal situation than you're probably 
+			dealing with, but might provide some inspiration when you're trying to work out what the absolute minimum you can 
+			do to get something to work is.
+		</li>
+	</ul>
+
+	<p>And, of course, you're always welcome to hit me up on Twitter: <a href="https://twitter.com/ErinJZimmer">@ErinJZimmer</a></p>
+
+	<p>Good luck, and happy upgrading!</p>
+</body>
+</html>
