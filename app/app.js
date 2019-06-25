@@ -7,8 +7,8 @@ import 'angular-google-maps';
 
 angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 	.constant('apiKey', 'AIzaSyCKwKMt_VIYXsJRi7NPA1DpE-hmXF8v41Y')
-	.config(function ($stateProvider, $urlRouterProvider) {
-		$urlRouterProvider.otherwise('/map/search');
+	.config(function ($stateProvider, $locationProvider) {
+		$locationProvider.html5Mode(true);
 		
 		$stateProvider
 			.state('map', {
@@ -45,12 +45,16 @@ angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 				templateUrl: '/controllers/driver-info-controller.html',
 				controller: 'DriverInfoCtrl'
 			})
-			.state('help', {
-				url: '/help',
-				component: 'appHelp'
-			})
 			.state('your-trips', {
 				url: '/trips',
 				component: 'appYourTrips'
+			})
+			.state('help', {
+				url: '/legacy-help',
+				controller: () => { 
+					if (history.go(-1) !== 'help') {
+						location = 'help';
+					}
+				}
 			});
 	});

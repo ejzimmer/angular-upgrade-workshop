@@ -17,6 +17,6 @@ setAngularJSGlobal(angular);
 platformBrowserDynamic().bootstrapModule(AppModule)
   .then((platformRef) => {
     const upgrade = platformRef.injector.get(UpgradeModule) as UpgradeModule;
-    upgrade.bootstrap(document.getElementById('legacy-app'), [ LegacyModule.name ])
+    upgrade.bootstrap(document.body, [ LegacyModule.name ])
   })
   .catch(err => console.error(err));

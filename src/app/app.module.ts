@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { HelpComponent } from './help/help.component';
 import { YourTripsComponent } from './your-trips/your-trips.component';
 import { HttpClientModule } from '@angular/common/http';
+import { AppRoutingModule } from './app-routing.module';
 
 @Directive({selector: 'app-user-rating'})
 export class UserRatingComponentWrapper extends UpgradeComponent {
@@ -27,7 +28,8 @@ export class UserRatingComponentWrapper extends UpgradeComponent {
   imports: [
     BrowserModule,
     UpgradeModule,
-    HttpClientModule
+    HttpClientModule,
+    AppRoutingModule
   ],
   providers: [
     {
@@ -41,7 +43,8 @@ export class UserRatingComponentWrapper extends UpgradeComponent {
       deps: ['$injector']
     }
   ],
-  entryComponents: [HelpComponent, YourTripsComponent]
+  entryComponents: [HelpComponent, YourTripsComponent],
+  bootstrap: [AppComponent]
 })
 export class AppModule { 
   ngDoBootstrap() {}
