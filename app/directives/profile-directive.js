@@ -9,7 +9,7 @@ angular.module('passengr')
 					element.classList.toggle('show-pane');
 				};
 
-				element.querySelector('.profile-picture').style.backgroundImage = 'url(images/Ellen_ripley.jpg)';
+				element.querySelector('.profile-picture').style.backgroundImage = 'url(assets/images/Ellen_ripley.jpg)';
 				$scope.userName = 'Ellen Ripley';
 			}
 		}
