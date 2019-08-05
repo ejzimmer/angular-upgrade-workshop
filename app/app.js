@@ -44,5 +44,9 @@ angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 				},
 				templateUrl: '/controllers/driver-info-controller.html',
 				controller: 'DriverInfoCtrl'
+			})
+			.state('help', {
+				url: '/help',
+				component: 'appHelp'
 			});
 	});
