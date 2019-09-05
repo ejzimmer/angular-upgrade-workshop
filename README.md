@@ -1,8 +1,5 @@
 Welcome to passengr.
 
-To run locally:
-gulp watch
-
 # Passengr
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.1.2.

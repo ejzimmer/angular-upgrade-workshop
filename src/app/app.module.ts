@@ -2,16 +2,18 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
+import { UpgradeModule } from '@angular/upgrade/static';
 
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    UpgradeModule
   ],
-  providers: []
+  providers: [],
 })
-export class AppModule { 
+export class AppModule {
   ngDoBootstrap() {}
 }
