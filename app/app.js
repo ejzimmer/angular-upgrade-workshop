@@ -1,6 +1,11 @@
 import angular from 'angular';
 
-export const LegacyModule = angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
+import 'lodash';
+import 'angular-simple-logger';
+import 'angular-ui-router';
+import 'angular-google-maps';
+
+angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 	.constant('apiKey', 'AIzaSyCKwKMt_VIYXsJRi7NPA1DpE-hmXF8v41Y')
 	.config(function ($stateProvider, $urlRouterProvider) {
 		$urlRouterProvider.otherwise('/map/search');

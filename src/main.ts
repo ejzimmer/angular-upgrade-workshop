@@ -1,12 +1,12 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { UpgradeModule, setAngularJSGlobal } from '@angular/upgrade/static';
+import angular from 'angular';
 
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
-import angular from 'angular';
-import { LegacyModule } from '../app/app';
+import { LegacyModule } from '../app/legacy-app';
 
 if (environment.production) {
   enableProdMode();
