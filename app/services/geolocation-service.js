@@ -11,13 +11,9 @@ angular.module('passengr')
 	};
 
 	this.getAddressFromCoords = async function (coords) {
-		if (coords) {
-			const url = this.getReverseGeocodeUrl(coords);
-			const response = await fetch(url);
-			return (await response.json()).results[0];
-		} else {
-			console.log('no coords supplied')
-		}
+		const url = this.getReverseGeocodeUrl(coords);
+		const response = await fetch(url);
+		return (await response.json()).results[0];
 	};
 
 	this.getReverseGeocodeUrl = function ({ latitude, longitude }) {
