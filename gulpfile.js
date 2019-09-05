@@ -63,5 +63,3 @@ exports.bundleJS = bundleJS;
 exports.uglifyJS = uglifyJS;
 exports.cacheTemplates = cacheTemplates;
 exports.buildSass = buildSass;
-// exports.build = parallel(series(cacheTemplates, bundleJS), buildSass);
-// exports.watch = series('build', parallel(watchAll, serve));

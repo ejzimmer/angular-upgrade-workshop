@@ -9,8 +9,6 @@
 		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/moon.css">
-		<link rel="stylesheet" href="css/fonts.css">
-		<link rel="stylesheet" href="css/notes.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/monokai.css">
@@ -23,19 +21,6 @@
 			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
-
-		<style>
-			h1 {
-				font-size: 2.5em;
-			}
-			h2 {
-				margin-top: 0;
-			}
-
-			ul li {
-				margin: .5em;
-			}
-		</style>
 	</head>
 	<body>
 		<div class="reveal">
@@ -43,24 +28,14 @@
 				<section>
 					<h1>
 						From legacy to legendary:
-						<div style="text-transform: none">modernising your AngularJS app</div>
+						modernising your AngularJS app
 					</h1>
 				</section>
-
-				<section>
-					<h2>Goals</h2>
-					<ul>
-						<li class="fragment">Understand the upgrade process</li>
-						<li class="fragment">See what can go wrong</li>
-						<li class="fragment">Develop an upgrade roadmap</li>
-					</ul>
-				</section>
-
 				<section>
 					<h2>Agenda</h2>
 					<ol>
-						<li>Setup AngularJS demo app</li>
-						<li>Setup hybrid app with ng-upgrade</li>
+						<li>Setup AngularJS app</li>
+						<li>Setup hybrid app</li>
 						<li>Working with hybrid app</li>
 						<li>Transitioning to Angular</li>
 					</ol>
@@ -72,81 +47,77 @@
 						<li class="fragment">ride share client</li>
 						<li class="fragment">Angular 1.4</li>
 						<li class="fragment">gulp (no modules)</li>
-						<li class="fragment">controllers</li>
-						<li class="fragment">ui-router</li>
+						<div class="fragment">controllers</div>
+						<div class="fragment">ui-router</div>
 					</ul>
 				</section>
 
-				<section class="horizontal">
-					<style>
-						.ng-upgrade {
-							position: relative;
-						}
-						.reveal .heart {
-							--side: 200px;
-							width: var(--side);
-							height: var(--side);
-							transform: rotate(.125turn);
-							background-color: pink;
-							flex-shrink: 0;
-							top: 20px;
-							left: 20px;
-							position: relative;
-						}
-						.heart::before, .heart::after {
-							--side: 100%;
-							--offset: calc(var(--side) / -2);
-							content: '';
-							display: block;
-							width: var(--side);
-							height: var(--side);
-							position: relative;
-							border-radius: 50%;
-							background-color: inherit;
-						}
-						.heart::before {
-							top: var(--offset);
-						}
-						.heart::after {
-							left: var(--offset);
-							top: calc(-1 * var(--side));
-						}
-					</style>
-					<img src="images/AngularJS.svg" style="width: 320px; top: 12px; margin-left: 40px;" class="ng-upgrade">
-					<div class="heart"></div>
-					<img src="images/angular.svg" style="width: 520px;" class="ng-upgrade">		
-					<code style="position: absolute; left: calc(50% - 4.5ch); top: 40%; color: #333">ngUpgrade</code>
+				<section>
+					<h2>ng-upgrade</h2>
+					<div class="fragment">AngularJS + Angular hybrid app</div>
 				</section>
 
 				<section>
 					<h2>AngularJS bootstrap</h2>
-					<pre class="fragment"><code class="js">angular.module('my-app', [])</code></pre>
-					<pre class="fragment"><code class="js">angular.module('my-app').controller('MyCtrl', ...)</code></pre>
-					<pre class="fragment"><code class="html">&lt;main ng-app="my-app"&gt;</code></pre>
-					<pre class="fragment"><code class="html">&lt;div ng-controller="MyCtrl"&gt;</code></pre>	
+					<div class="fragment">angular.module('my-app', [])</div>
+					<div class="fragment">&lt;main ng-app="my-app"&gt;</div>
 				</section>
 
 				<section>
 					<h2>Angular bootstrap</h2>
-					<pre class="fragment"><code>platformBrowserDynamic().bootstrapModule(AppModule)</code></pre>
-					<pre class="fragment"><code>bootstrap: [AppComponent]</code></pre>
-					<pre class="fragment"><code>selector: 'app-root'</code></pre>
-					<pre class="fragment"><code class="html">&lt;app-root>&lt;/app-root></code></pre>
+					<div class="fragment">main.ts</div>
+					<div class="fragment">AppModule</div>
+					<div class="fragment">bootstrap: [AppComponent]</div>
+					<div class="fragment">selector: 'app-root'</div>
 				</section>
 
 				<section>
-					<h2>ng-upgrade bootstrap...</h2>
-					<div class="fragment">A little from column A...<br>&nbsp; A little from column B...</div>
+					<h2>ng-upgrade bootstrap</h2>
+				</section>
+
+				<section>
+					<h2>AngularJS host</h2>
+
+					<div class="angular-app">
+						<div class="controller">
+							<div class="component"></div>
+							<div class="component"></div>
+						</div>
+						<div class="controller"></div>
+						<div class="angular-js-service"></div>
+						<div class="angular-service"></div>
+					</div>
+
+					<div class="notes">
+						bootstrap AngularJS app
+						AngularJS controls root of app & routing
+						Angular just provides components & services to use in AngularJS app
+						Ideal setup at first, when majority of app is AngularJS
+					</div>
 				</section>
 
 				<section>
 					<h2>Upgrading & downgrading</h2>
 					<ul>
-						<li class="fragment">Angular component to AngularJS directive</li>
-						<li class="fragment">Angular service to AngularJS factory</li>
-						<li class="fragment">AngularJS service to Angular provider/injectable</li>
-						<li class="fragment">AngularJS directive to Angular directive</li>
+						<li class="fragment">Angular component -> directive</li>
+						<li class="fragment">Angular service -> factory</li>
+						<li class="fragment">AngularJS service -> provider/injectable</li>
+						<li class="fragment">AngularJS directive -> directive</li>
 					</ul>
+				</section>
+
+				<section>
+					<h2>Angular host</h2>
+					<div class="angular-app">
+						<div class="angular-js-app">
+							<div class="controller">
+								<div class="component"></div>
+							</div>
+							<div class="controller"></div>
+							<div class="angular-js-service"></div>
+						</div>
+						<div class="angular-service"></div>
+					</div>
 				</section>
 
 				<section>

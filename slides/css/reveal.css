@@ -25,10 +25,6 @@ body {
   color: #000; 
 }
 
-.notes {
-  display: none;
-}
-
 /*********************************************
  * VIEW FRAGMENTS
  *********************************************/
@@ -194,20 +190,10 @@ body {
   padding: 20px 0px;
   pointer-events: auto;
   z-index: 10;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  height: 100%;
   -webkit-transform-style: flat;
           transform-style: flat;
   transition: -webkit-transform-origin 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), -webkit-transform 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), visibility 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), opacity 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   transition: transform-origin 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), transform 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), visibility 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985), opacity 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }
-
-.reveal .slides > section.horizontal {
-  flex-direction: row;
-  align-items: center;
-  height: auto;
-}
 
 .reveal[data-transition-speed="fast"] .slides section,
   .reveal .slides section[data-transition-speed="fast"] {

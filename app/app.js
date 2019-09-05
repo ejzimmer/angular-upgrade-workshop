@@ -18,9 +18,7 @@ angular.module('passengr', ['ui.router', 'uiGmapgoogle-maps'])
 			.state('map.confirm', {
 				url: '/confirm',
 				resolve: {
-					route: async function (DirectionsService) {
-						return DirectionsService.calculateRoute();
-					}
+					route: async (DirectionsService) =>  DirectionsService.calculateRoute()
 				},
 				templateUrl: '/controllers/confirm-controller.html',
 				controller: 'ConfirmCtrl'
