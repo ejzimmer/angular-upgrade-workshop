@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.4.14",
+    "angular": "^1.8.3",
     "angular-google-maps": "^2.4.1",
     "angular-ui-bootstrap": "^2.5.6",
     "angular-ui-router": "^1.0.22",
